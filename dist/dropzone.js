@@ -142,7 +142,7 @@
     }).send();
   };
 
-  AmazonXHR.upload_chunk = function(auth, key, upload_id, chunk_num, chunk, callbacks, xhr_callback) {
+  AmazonXHR.uploadChunk = function(auth, key, upload_id, chunkNum, chunk, callbacks, xhr_callback) {
     var callback, error_callback, progress_callback, readystate_callback;
     if (callbacks instanceof Object) {
       callback = callbacks.load_callback;
@@ -153,7 +153,7 @@
       callback = callbacks;
     }
     var querystring = {
-      partNumber: chunk_num + 1,
+      partNumber: chunkNum + 1,
       uploadId: upload_id
     };
     return (new AmazonXHR({
@@ -470,7 +470,7 @@
       url: null,
       method: "post",
       withCredentials: false,
-      parallelUploads: 5,
+      parallelUploads: 4,
       // uploadMultiple: false, -- Delete this
       maxFilesize: 256,
       paramName: "file",
@@ -480,7 +480,7 @@
       thumbnailHeight: 120,
       filesizeBase: 1000,
       maxFiles: null,
-      maxConcurrentWorkers: 5,
+      maxConcurrentWorkers: 4,
       maxChunkSize: 1025 * 1024 * 6, // 6 MB
       params: {},
       clickable: true,
@@ -1316,8 +1316,12 @@
           CHUNK_UPLOADING = 'uploading',
           CHUNK_SUCCESS = 'success';
         return {
-          init: function(auth, s3Filename, force, chunkSize, callback) {
+          init: function(theAuth, theS3Filename, force, theChunkSize, callback) {
+            // Assign to private vars
+            auth = theAuth;
             auth.date = new Date(auth.date);
+            s3Filename = theS3Filename;
+            chunkSize = theChunkSize;
 
             if (!auth.uploadId) {
               // New file. Initiate a multipart upload with Amazon
@@ -1327,7 +1331,10 @@
 
                 var num_chunks = Math.ceil(file.size / chunkSize);
                 for (var i = 0; i < num_chunks; i++) {
-                  chunks.push(CHUNK_QUEUED);
+                  chunks.push({
+                    'status': CHUNK_QUEUED,
+                    'progressDate': false,
+                  });
                 }
                 callback();
               });
@@ -1343,7 +1350,7 @@
           getNextQueuedChunk: function() {
             var _l, i;
             for (i = 0, _l = chunks.length; i < _l; i++) {
-              if(chunks[i] === CHUNK_QUEUED) {
+              if(chunks[i].status === CHUNK_QUEUED) {
                 return i;
               }
             }
@@ -1352,7 +1359,7 @@
           getUploadingChunks: function() {
             var _ret = [], _l, i;
             for (i = 0, _l = chunks.length; i < _l; i++) {
-              if(chunks[i] === CHUNK_UPLOADING) {
+              if(chunks[i].status === CHUNK_UPLOADING) {
                 _ret.push(i);
               }
             }
@@ -1360,22 +1367,21 @@
           },
           uploadChunk: function(chunkNum, callbacks) {
             // get the start and end bytes for the needed chunk
-            var length = chunkSize;
-            var start = chunk * length;
-            var end = Math.min(start + length, file.size);
-            chunks[chunkNum] = CHUNK_UPLOADING;
-            AmazonXHR.upload_chunk(auth, s3Filename, uploadId, chunkNum, file.slice(start, end), callbacks, function(xhr) {
-              u._chunk_xhr = u._chunk_xhr || [];
-              u._chunk_xhr.push(xhr);
+            var chunk = chunks[chunkNum],
+              length = chunkSize,
+              start = chunkNum * length,
+              end = Math.min(start + length, file.size);
+            chunk.status = CHUNK_UPLOADING;
+            chunk.progressDate = new Date();
+            AmazonXHR.uploadChunk(auth, s3Filename, uploadId, chunkNum, file.slice(start, end), callbacks, function(xhr) {
+              // chunk.xhr = xhr;
               // the watcher interval; it cancels the xhr if it times out
-              u._intervals[chunk] = setInterval(function() {
-                  if(last_progress_time && (new Date() - last_progress_time) > 15000) { // 15s
-                    log("Chunk Failed; retry");
-                    clearInterval(u._intervals[chunk]);
-                    if(u.get_state() == "processing") {
+              chunk.interval = setInterval(function() {
+                  if(chunk.progressDate && (new Date() - chunk.progressDate) > 15000) { // 15s
+                    clearInterval(chunk.interval);
+                    if(file.status == Dropzone.UPLOADING) {
                       xhr.abort();
-                      error_handler.call(xhr);
-                      u._chunk_xhr[u._chunk_xhr.indexOf(xhr)] = null;
+                      callbacks.error_handler.call(xhr);
                     }
                   }
               }, 4000); // every 4s
@@ -1554,18 +1560,21 @@
     };
 
     Dropzone.prototype.processQueue = function() {
-      var activeFiles = this.getActiveFiles(),
+      var file,
+      chunkNum,
+        activeFiles = this.getActiveFiles(),
         parallelMax = this.options.parallelUploads,
-        workerCount = this.getWorkerCount();
+        workerCount = this.getWorkerCount(),
+        file = activeFiles.shift();
         while (workerCount <= this.options.maxConcurrentWorkers) {
-          if ((chunkNUm = file.upload.getNextQueuedChunk()) !== false) {
+          if ((chunkNum = file.upload.getNextQueuedChunk()) !== false) {
             file.processing = true;
             file.status = Dropzone.UPLOADING;
             this.emit("processing", file);
             file.upload.uploadChunk(chunkNum);
             workerCount++;
           } else if (this.getUploadingFiles().length >= parallelMax || !(file = activeFiles.shift())) {
-              return;
+              break;
           }
         }
     };
