@@ -1316,7 +1316,7 @@
           CHUNK_UPLOADING = 'uploading',
           CHUNK_SUCCESS = 'success',
           updateChunks = function(parts){
-            var i, numChunks = Math.ceil(u.file.size / chunkSize);
+            var i, numChunks = Math.ceil(file.size / chunkSize);
             chunks = new Array(numChunks);
             for(i = 0; i < parts.length; i++) {
                 var partNumber = parseInt(parts[i][0], 10);
@@ -1328,6 +1328,15 @@
                 chunks[i].status = CHUNK_QUEUED;
                 chunks[i].bytesSent = 0;
               }
+            }
+          },
+          getChunkSize = function(chunkNum) {
+            if ((chunks.length - 1) == chunkNum) {
+              return file.size % chunkSize;
+            } else if ((chunks.length - 1) > chunkNum) {
+              return chunkSize;
+            } else {
+              return false;
             }
           };
         return {
@@ -1367,15 +1376,7 @@
               });
             }
           },
-          getChunkSize: function(chunkNum) {
-            if ((chunks.length - 1) == chunkNum) {
-              return file.size % chunkSize;
-            } else if ((chunks.length - 1) > chunkNum) {
-              return chunkSize;
-            } else {
-              return false;
-            }
-          },
+
           getNextQueuedChunk: function() {
             for (var i = 0, _l = chunks.length; i < _l; i++) {
               if(chunks[i].status === CHUNK_QUEUED) {
@@ -1429,6 +1430,10 @@
             for (var i = chunks.length - 1; i >= 0; i--) {
               totalBytes += chunks[i].bytesSent;
             }
+          },
+          setChunkComplete: function(chunkNum) {
+            this.setChunkProgress(chunkNum, getChunkSize(chunkNum));
+            clearInterval(chunks[chunkNum].interval);
           },
           getTotalProgress: function() {
             return totalBytes / file.size * 100;
@@ -1704,29 +1709,15 @@
       file.status = Dropzone.UPLOADING;
       this.emit("processing", file);
 
-      var handleError = (function(_this) {
-        return function() {
-          var _j, _len1, _results;
-          _results = [];
-          for (_j = 0, _len1 = files.length; _j < _len1; _j++) {
-            file = files[_j];
-            _results.push(_this._errorProcessing(files, response || _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr));
-          }
-          return _results;
-        };
-      })(this);
-      callbacks.progress_callback = (function(_this) {
+      callbacks.progress_callback = (function(_this, file) {
         return function(e) {
-          // if (e != null) {
-            file.upload.setChunkProgress(chunkNum, e.loaded);
-            // update the last_progress_time for the watcher interval
-            file.upload.progressDate = new Date();
-            _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
-          // }
-          // return _results;
+          file.upload.setChunkProgress(chunkNum, e.loaded);
+          // update the last_progress_time for the watcher interval
+          file.upload.progressDate = new Date();
+          _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
         };
-      })(this);
-      callbacks.state_change_callback = (function(_this) {
+      })(this, file);
+      callbacks.state_change_callback = (function(_this, file) {
         return function(e) {
           var _ref;
           if (file.status === Dropzone.CANCELED) {
@@ -1736,27 +1727,27 @@
             return;
           }
           if(e.target.status / 100 != 2) {
-            return handleError();
+            return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.status), e)
           }
 
-          file.upload.setChunkProgress(chunkNum, file.upload.getChunkSize(chunkNum));
+          file.upload.setChunkComplete(chunkNum);
           // update the last_progress_time for the watcher interval
-          file.upload.progressDate = new Date();
+          // file.upload.progressDate = new Date();
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
           // return _this._finished(files, response, e);
           file.upload.finishUpload();
           // _finish
           // run Queue
         };
-      })(this);
-      callbacks.error_callback = callbacks.timeout_callback = (function(_this) {
-        return function() {
+      })(this, file);
+      callbacks.error_callback = (function(_this, file) {
+        return function(e) {
           if (file.status === Dropzone.CANCELED) {
             return;
           }
-          return handleError();
+          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.status), e)
         };
-      })(this);
+      })(this, file);
 
       // this.emit("sending", file, xhr, formData);
       file.upload.uploadChunk(chunkNum, callbacks);
