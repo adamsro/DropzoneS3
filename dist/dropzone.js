@@ -498,7 +498,6 @@
       ignoreHiddenFiles: true,
       acceptedFiles: null,
       acceptedMimeTypes: null,
-      autoProcessQueue: true,
       autoQueue: true,
       addRemoveLinks: false,
       previewsContainer: null,
@@ -1326,19 +1325,25 @@
           CHUNK_QUEUED = 'queued',
           CHUNK_UPLOADING = 'uploading',
           CHUNK_SUCCESS = 'success',
-          updateChunks = function(parts){
-            var i, numChunks = Math.ceil(file.size / chunkSize);
+          // Rebuild all the chunk status information.
+          initChunkArray = function() {
+            var numChunks = Math.ceil(file.size / chunkSize);
             chunks = new Array(numChunks);
-            for(i = 0; i < parts.length; i++) {
+            for (var i = 0; i < numChunks; i++) {
+              chunks[i] = {
+                'status': CHUNK_QUEUED,
+                'bytesSent': 0,
+                'progressDate': false,
+              };
+            }
+          },
+          // Rebuild our chunk info based on what we receive from Amazon
+          updateChunks = function(parts) {
+            initChunkArray();
+            for(var i = 0; i < parts.length; i++) {
                 var partNumber = parseInt(parts[i][0], 10);
                 chunks[partNumber - 1].status = CHUNK_SUCCESS;
                 chunks[partNumber - 1].bytesSent = chunkSize;
-            }
-            for(i = 0; i < numChunks; i++) {
-              if (chunks[i].status !== CHUNK_SUCCESS) {
-                chunks[i].status = CHUNK_QUEUED;
-                chunks[i].bytesSent = 0;
-              }
             }
           },
           getChunkSize = function(chunkNum) {
@@ -1363,15 +1368,7 @@
               AmazonXHR.init(auth, s3Filename, file, function(e) {
                 var xml = e.target.responseXML;
                 uploadId = xml.getElementsByTagName('UploadId')[0].textContent;
-
-                var num_chunks = Math.ceil(file.size / chunkSize);
-                for (var i = 0; i < num_chunks; i++) {
-                  chunks.push({
-                    'status': CHUNK_QUEUED,
-                    'bytesSent': 0,
-                    'progressDate': false,
-                  });
-                }
+                initChunkArray();
                 callback();
               });
             } else {
@@ -1424,15 +1421,15 @@
             AmazonXHR.uploadChunk(auth, s3Filename, uploadId, chunkNum, file.slice(start, end), callbacks, function(xhr) {
               // chunk.xhr = xhr;
               // the watcher interval; it cancels the xhr if it times out
-              chunk.interval = setInterval(function() {
+              chunk.interval = setInterval((function(xhr) {
                   if(chunk.progressDate && (new Date() - chunk.progressDate) > 15000) { // 15s
                     clearInterval(chunk.interval);
                     if(file.status == Dropzone.UPLOADING) {
                       xhr.abort();
-                      callbacks.error_callback.call(xhr);
+                      callbacks.error_callback(xhr);
                     }
                   }
-              }, 4000); // every 4s
+              })(xhr), 4000); // every 4s
             });
           },
           setChunkProgress: function(chunkNum, bytesSent) {
@@ -1463,7 +1460,9 @@
             AmazonXHR.list(auth, file, s3Filename, uploadId, chunkSize, function(parts) {
               if(parts.length != chunks.length) {
                 updateChunks(parts);
-                partsIncompleteCallback();
+                if (typeof(partsIncompleteCallback) === "function") {
+                  partsIncompleteCallback();
+                }
               } else {
                 AmazonXHR.finish(auth, file, s3Filename, uploadId, parts, chunkSize, handler);
               }
@@ -1520,11 +1519,9 @@
           // Initiate multipart upload with Amazon.
           file.upload.init(json, json.unique_filename, false, _this.options.maxChunkSize, function() {
             file.status = Dropzone.QUEUED;
-            if (_this.options.autoProcessQueue) {
-              return setTimeout(function() {
-                return _this.processQueue();
-              }, 0);
-            }
+            return setTimeout(function() {
+              return _this.processQueue();
+            }, 0);
           });
         };
         xhr.send();
@@ -1700,9 +1697,7 @@
           this.emit("canceledmultiple", [file]);
         }
       }
-      if (this.options.autoProcessQueue) {
-        return this.processQueue();
-      }
+      return this.processQueue();
     };
 
     resolveOption = function() {
@@ -1765,8 +1760,23 @@
     };
 
     Dropzone.prototype.finishUpload = function(file) {
-
-      file.upload.finishUpload(handler, processQueueCallback);
+      var handler = function(e) {
+        if(e.target.status / 100 == 2) {
+          this._finished([file], e.target.responseText, e);
+        } else if (e.target.status == 400 && e.target.responseText.indexOf("EntityTooSmall") !== -1) {
+          // Recursive. Check again for missing parts and attempt to send.
+          file.upload.finishUpload(handler, function() { _this.processQueue(); });
+        } else if(e.target.status == 404) {
+          // 404 = NoSuchUpload - restart from the beginning. yup.
+          file.upload.reset();
+          file.status = Dropzone.QUEUED;
+          _this.processQueue();
+        } else  {
+          // xhr = new XMLHttpRequest();
+          // xhr.
+        }
+      }
+      file.upload.finishUpload(handler, function() { _this.processQueue(); });
     };
 
     Dropzone.prototype._finished = function(files, responseText, e) {
@@ -1781,9 +1791,7 @@
         this.emit("successmultiple", files, responseText, e);
         this.emit("completemultiple", files);
       }
-      if (this.options.autoProcessQueue) {
-        return this.processQueue();
-      }
+      return this.processQueue();
     };
 
     Dropzone.prototype._errorProcessing = function(files, message, xhr) {
@@ -1798,9 +1806,7 @@
         this.emit("errormultiple", files, message, xhr);
         this.emit("completemultiple", files);
       }
-      if (this.options.autoProcessQueue) {
-        return this.processQueue();
-      }
+      return this.processQueue();
     };
 
     return Dropzone;
