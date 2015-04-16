@@ -234,17 +234,28 @@
       }
       url = url.slice(0, -1); // remove extra ampersand
 
-      // Send the request
       var xhr = new XMLHttpRequest();
+      xhr.addEventListener("load", self.settings.load_callback, true);
+      xhr.addEventListener("readystatechange", self.settings.state_change_callback);
+      xhr.addEventListener("error", self.settings.error_callback, true);
+      xhr.upload.addEventListener('progress', self.settings.progress_callback);
+      //xhr.addEventListener("progress", self.settings.progress_callback);
+      xhr.addEventListener('timeout', self.settings.timeout_callback);
+
+      // xhr.onload = self.settings.load_callback;
+      // xhr.onreadystatechange = self.settings.state_change_callback;
+      // xhr.onerror = self.settings.error_callback;
+      // xhr.onprogress = self.settings.progress_callback;
+      // xhr.ontimeout = self.settings.timeout_callback;
+
+      // default to GET
+      self.settings.method = self.settings.method || "GET";
+
       xhr.open(self.settings.method, url, true);
       for(var header in self.headers) {
         xhr.setRequestHeader(header, self.headers[header]);
       }
-      xhr.addEventListener("load", self.settings.load_callback, true);
-      xhr.addEventListener("readystatechange", self.settings.state_change_callback);
-      xhr.addEventListener("error", self.settings.error_callback, true);
-      xhr.addEventListener("progress", self.settings.progress_callback);
-      xhr.addEventListener('timeout', self.settings.timeout_callback);
+
       if (self.settings.payload) {
         xhr.send(self.settings.payload);
       } else {
@@ -1709,15 +1720,15 @@
       file.status = Dropzone.UPLOADING;
       this.emit("processing", file);
 
-      callbacks.progress_callback = (function(_this, file) {
+      callbacks.progress_callback = (function(_this, file, chunkNum) {
         return function(e) {
           file.upload.setChunkProgress(chunkNum, e.loaded);
           // update the last_progress_time for the watcher interval
           file.upload.progressDate = new Date();
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
         };
-      })(this, file);
-      callbacks.state_change_callback = (function(_this, file) {
+      })(this, file, chunkNum);
+      callbacks.state_change_callback = (function(_this, file, chunkNum) {
         return function(e) {
           var _ref;
           if (file.status === Dropzone.CANCELED) {
@@ -1739,15 +1750,15 @@
           // _finish
           // run Queue
         };
-      })(this, file);
-      callbacks.error_callback = (function(_this, file) {
+      })(this, file, chunkNum);
+      callbacks.error_callback = (function(_this, file, chunkNum) {
         return function(e) {
           if (file.status === Dropzone.CANCELED) {
             return;
           }
           return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.status), e)
         };
-      })(this, file);
+      })(this, file, chunkNum);
 
       // this.emit("sending", file, xhr, formData);
       file.upload.uploadChunk(chunkNum, callbacks);
