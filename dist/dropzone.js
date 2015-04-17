@@ -49,7 +49,7 @@
   AmazonXHR = function(settings) {
     this.settings = settings;
   };
-  AmazonXHR.finish = function(auth, file, key, upload_id, parts, chunk_size, callback) {
+  AmazonXHR.finish = function(auth, file, key, upload_id, parts, chunk_size, load_callback, error_callback) {
     var querystring = {
       "uploadId": upload_id
     };
@@ -77,7 +77,8 @@
       querystring: querystring,
       headers: {},
       payload: data,
-      load_callback: callback
+      load_callback: load_callback,
+      error_callback: error_callback,
     }).send();
   };
   AmazonXHR.list = function(auth, file, key, upload_id, chunk_size, callback, error_callback, marker) {
@@ -239,14 +240,7 @@
       xhr.addEventListener("readystatechange", self.settings.state_change_callback);
       xhr.addEventListener("error", self.settings.error_callback, true);
       xhr.upload.addEventListener('progress', self.settings.progress_callback);
-      //xhr.addEventListener("progress", self.settings.progress_callback);
       xhr.addEventListener('timeout', self.settings.timeout_callback);
-
-      // xhr.onload = self.settings.load_callback;
-      // xhr.onreadystatechange = self.settings.state_change_callback;
-      // xhr.onerror = self.settings.error_callback;
-      // xhr.onprogress = self.settings.progress_callback;
-      // xhr.ontimeout = self.settings.timeout_callback;
 
       // default to GET
       self.settings.method = self.settings.method || "GET";
@@ -1456,7 +1450,7 @@
             chunks = [];
             uploadId = null;
           },
-          finishUpload: function(handler, partsIncompleteCallback) {
+          finishUpload: function(load_callback, error_callback, partsIncompleteCallback) {
             // Check that we uploaded all the chunks and upload any missing ones if we didnt.
             AmazonXHR.list(auth, file, s3Filename, uploadId, chunkSize, function(parts) {
               if(parts.length != chunks.length) {
@@ -1465,7 +1459,7 @@
                   partsIncompleteCallback();
                 }
               } else {
-                AmazonXHR.finish(auth, file, s3Filename, uploadId, parts, chunkSize, handler);
+                AmazonXHR.finish(auth, file, s3Filename, uploadId, parts, chunkSize, load_callback, error_callback);
               }
             });
           }
@@ -1728,6 +1722,7 @@
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
         };
       })(this, file, chunkNum);
+
       callbacks.state_change_callback = (function(_this, file, chunkNum) {
         return function(e) {
           var _ref;
@@ -1740,16 +1735,15 @@
           if(e.target.status / 100 != 2) {
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.status), e)
           }
-
           file.upload.setChunkComplete(chunkNum);
           // update the last_progress_time for the watcher interval
           // file.upload.progressDate = new Date();
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
-
           _this.processQueue();
 
         };
       })(this, file, chunkNum);
+
       callbacks.error_callback = (function(_this, file, chunkNum) {
         return function(e) {
           if (file.status === Dropzone.CANCELED) {
@@ -1765,25 +1759,33 @@
 
     Dropzone.prototype._finishUpload = function(file) {
       var _this = this;
-      var handler = (function(_this) {
+
+      file.status = Dropzone.FINISHING;
+
+      var load_callback = (function(_this, file) {
         return function(e) {
           if(e.target.status / 100 == 2) {
             _this._finished([file], e.target.responseText, e);
           } else if (e.target.status == 400 && e.target.responseText.indexOf("EntityTooSmall") !== -1) {
             // Recursive. Check again for missing parts and attempt to send.
-            file.upload.finishUpload(handler, function() { _this.processQueue(); });
+            file.upload.finishUpload(load_callback, function() { _this.processQueue(); });
           } else if(e.target.status == 404) {
             // 404 = NoSuchUpload - restart from the beginning. yup.
             file.upload.reset();
             file.status = Dropzone.QUEUED;
             _this.processQueue();
-          } else  {
-            // xhr = new XMLHttpRequest();
-            // xhr.
           }
         }
-      })(this);
-      file.upload.finishUpload(handler, function() { _this.processQueue(); });
+      })(this, file);
+
+      var error_callback = (function(_this, file) {
+        return function(e) {
+          file.status = Dropzone.QUEUED;
+          _this.processQueue();
+        }
+      })(this, file);
+
+      file.upload.finishUpload(load_callback, error_callback, function() { _this.processQueue(); });
     };
 
     Dropzone.prototype._finished = function(files, responseText, e) {
@@ -2042,6 +2044,8 @@
   Dropzone.UPLOADING = "uploading";
 
   Dropzone.PROCESSING = Dropzone.UPLOADING;
+
+  Dropzone.FINISHING = "finishing";
 
   Dropzone.CANCELED = "canceled";
 
