@@ -1442,6 +1442,7 @@
           setChunkComplete: function(chunkNum) {
             this.setChunkProgress(chunkNum, getChunkSize(chunkNum));
             clearInterval(chunks[chunkNum].interval);
+            chunks[chunkNum].status = CHUNK_SUCCESS;
           },
           getTotalProgress: function() {
             return totalBytes / file.size * 100;
@@ -1636,24 +1637,28 @@
     };
 
     Dropzone.prototype.processQueue = function() {
-      var file,
-        chunkNum,
+      var file, chunkNum,
         activeFiles = this.getActiveFiles(),
         parallelMax = this.options.parallelUploads,
-        workerCount = this.getWorkerCount(),
-      file = activeFiles.shift();
+        workerCount = this.getWorkerCount();
+
+      if (!(file = activeFiles.shift())) {
+      // Nothing to process - no QUEUED or UPLOADING status files.
+        return;
+      }
       while (workerCount < this.options.maxConcurrentWorkers) {
         if ((chunkNum = file.upload.getNextQueuedChunk()) !== false) {
-          file.processing = true;
           this.uploadChunk(file, chunkNum);
           workerCount++;
         } else if (this.getUploadingFiles().length >= parallelMax || !(file = activeFiles.shift())) {
             break;
         }
       }
-      for (i = 0, activeFiles = this.getActiveFiles(); i < activeFiles; i++) {
+      // Attempt to finish uploads
+      activeFiles = this.getActiveFiles();
+      while (file = activeFiles.shift()) {
         if (file.upload.chunksSuccessful()) {
-          this.finishUpload(file);
+          this._finishUpload(file);
         }
       }
     };
@@ -1740,10 +1745,9 @@
           // update the last_progress_time for the watcher interval
           // file.upload.progressDate = new Date();
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
-          // return _this._finished(files, response, e);
-          file.upload.finishUpload();
-          // _finish
-          // run Queue
+
+          _this.processQueue();
+
         };
       })(this, file, chunkNum);
       callbacks.error_callback = (function(_this, file, chunkNum) {
@@ -1759,23 +1763,26 @@
       file.upload.uploadChunk(chunkNum, callbacks);
     };
 
-    Dropzone.prototype.finishUpload = function(file) {
-      var handler = function(e) {
-        if(e.target.status / 100 == 2) {
-          this._finished([file], e.target.responseText, e);
-        } else if (e.target.status == 400 && e.target.responseText.indexOf("EntityTooSmall") !== -1) {
-          // Recursive. Check again for missing parts and attempt to send.
-          file.upload.finishUpload(handler, function() { _this.processQueue(); });
-        } else if(e.target.status == 404) {
-          // 404 = NoSuchUpload - restart from the beginning. yup.
-          file.upload.reset();
-          file.status = Dropzone.QUEUED;
-          _this.processQueue();
-        } else  {
-          // xhr = new XMLHttpRequest();
-          // xhr.
+    Dropzone.prototype._finishUpload = function(file) {
+      var _this = this;
+      var handler = (function(_this) {
+        return function(e) {
+          if(e.target.status / 100 == 2) {
+            _this._finished([file], e.target.responseText, e);
+          } else if (e.target.status == 400 && e.target.responseText.indexOf("EntityTooSmall") !== -1) {
+            // Recursive. Check again for missing parts and attempt to send.
+            file.upload.finishUpload(handler, function() { _this.processQueue(); });
+          } else if(e.target.status == 404) {
+            // 404 = NoSuchUpload - restart from the beginning. yup.
+            file.upload.reset();
+            file.status = Dropzone.QUEUED;
+            _this.processQueue();
+          } else  {
+            // xhr = new XMLHttpRequest();
+            // xhr.
+          }
         }
-      }
+      })(this);
       file.upload.finishUpload(handler, function() { _this.processQueue(); });
     };
 
