@@ -61,7 +61,7 @@
       }
     }
 
-    .dz-error-mark, .dz-success-mark {
+    .dz-error-mark, .dz-success-mark, .dz-resume-mark {
       position: absolute;
       display: none;
       left: 30px;
@@ -71,8 +71,10 @@
       left: 50%;
       margin-left: -(54px/2);
     }
-
-
+    .dz-pause-resume:after {
+      content:"\000A";
+      white-space: pre;
+    }
   }
 
 }

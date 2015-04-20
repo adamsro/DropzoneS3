@@ -469,15 +469,45 @@
         dropzone.on("dragEnter", function() { });
      */
 
-    Dropzone.prototype.events = ["drop", "dragstart", "dragend", "dragenter", "dragover", "dragleave", "addedfile", "removedfile", "thumbnail", "error", "errormultiple", "processing", "processingmultiple", "uploadprogress", "totaluploadprogress", "sending", "sendingmultiple", "success", "successmultiple", "canceled", "canceledmultiple", "complete", "completemultiple", "reset", "maxfilesexceeded", "maxfilesreached", "queuecomplete"];
+    Dropzone.prototype.events = [
+    "drop",
+    "dragstart",
+    "dragend",
+    "dragenter",
+    "dragover",
+    "dragleave",
+    "addedfile",
+    "removedfile",
+    "thumbnail",
+    "error",
+    "errormultiple",
+    "processing",
+    "processingmultiple",
+    "uploadprogress",
+    "totaluploadprogress",
+    "sending",
+    "sendingmultiple",
+    "success",
+    "successmultiple",
+    "canceled",
+    "canceledmultiple",
+    "complete",
+    "completemultiple",
+    "reset",
+    "maxfilesexceeded",
+    "maxfilesreached",
+    "queuecomplete",
+    "pausing",
+    "resuming",
+    ];
 
-    Dropzone.prototype.defaultOptions = {
+   Dropzone.prototype.defaultOptions = {
       url: null,
-      method: "post",
+      method: "post", // TODO remove
       withCredentials: false,
-      parallelUploads: 4,
-      // uploadMultiple: false, -- Delete this
-      maxFilesize: 256,
+      parallelUploads: 6,
+      // uploadMultiple: false, -- TODO Delete this
+      maxFilesize: 1000 * 10, // 10 GB
       paramName: "file",
       createImageThumbnails: true,
       maxThumbnailFilesize: 10,
@@ -485,15 +515,16 @@
       thumbnailHeight: 120,
       filesizeBase: 1000,
       maxFiles: null,
-      maxConcurrentWorkers: 4,
-      maxChunkSize: 1025 * 1024 * 6, // 6 MB
+      maxConcurrentWorkers: 6,
+      maxChunkSize: 1024 * 1024 * 6, // 6 MB
       params: {},
       clickable: true,
       ignoreHiddenFiles: true,
       acceptedFiles: null,
       acceptedMimeTypes: null,
       autoQueue: true,
-      addRemoveLinks: false,
+      addRemoveLinks: true,
+      addPauseResumeLinks: true,
       previewsContainer: null,
       capture: null,
       dictDefaultMessage: "Drop files here to upload",
@@ -503,6 +534,7 @@
       dictInvalidFileType: "You can't upload files of this type.",
       dictResponseError: "Server responded with {{statusCode}} code.",
       dictCancelUpload: "Cancel upload",
+      dictResumeUpload: "Resume upload",
       dictCancelUploadConfirmation: "Are you sure you want to cancel this upload?",
       dictRemoveFile: "Remove file",
       dictRemoveFileConfirmation: null,
@@ -620,6 +652,7 @@
             node = _ref1[_j];
             node.innerHTML = this.filesize(file.size);
           }
+
           if (this.options.addRemoveLinks) {
             file._removeLink = Dropzone.createElement("<a class=\"dz-remove\" href=\"javascript:undefined;\" data-dz-remove>" + this.options.dictRemoveFile + "</a>");
             file.previewElement.appendChild(file._removeLink);
@@ -649,7 +682,7 @@
             removeLink = _ref2[_k];
             _results.push(removeLink.addEventListener("click", removeFileEvent));
           }
-          return _results;
+          // return _results;
         }
       },
       removedfile: function(file) {
@@ -699,8 +732,31 @@
         if (file.previewElement) {
           file.previewElement.classList.add("dz-processing");
           if (file._removeLink) {
-            return file._removeLink.textContent = this.options.dictCancelUpload;
+            file._removeLink.textContent = this.options.dictCancelUpload;
           }
+        }
+      },
+      pausing: function(file) {
+        if (this.options.resumable) {
+          file._resumeLink = Dropzone.createElement("<a class=\"dz-resume\" href=\"javascript:undefined;\" data-dz-resume>" + this.options.dictResumeUpload + "</a>");
+          file.previewElement.appendChild(file.resumeLink);
+
+          var resumeFileEvent = (function(_this) {
+            return function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (file.status === Dropzone.PAUSED) {
+                _this.resumeFile(file);
+              }
+            };
+          })(this);
+
+          file._resumeLink.addEventListener("click", resumeFileEvent);
+        }
+      },
+      resuming: function(file) {
+        if (file._resumeLink) {
+          file._resumeLink.parentNode.removeChild(file._resumeLink);
         }
       },
       processingmultiple: noop,
@@ -745,7 +801,45 @@
       maxfilesexceeded: noop,
       maxfilesreached: noop,
       queuecomplete: noop,
-      previewTemplate: "<div class=\"dz-preview dz-file-preview\">\n  <div class=\"dz-image\"><img data-dz-thumbnail /></div>\n  <div class=\"dz-details\">\n    <div class=\"dz-size\"><span data-dz-size></span></div>\n    <div class=\"dz-filename\"><span data-dz-name></span></div>\n  </div>\n  <div class=\"dz-progress\"><span class=\"dz-upload\" data-dz-uploadprogress></span></div>\n  <div class=\"dz-error-message\"><span data-dz-errormessage></span></div>\n  <div class=\"dz-success-mark\">\n    <svg width=\"54px\" height=\"54px\" viewBox=\"0 0 54 54\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:sketch=\"http://www.bohemiancoding.com/sketch/ns\">\n      <title>Check</title>\n      <defs></defs>\n      <g id=\"Page-1\" stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\" sketch:type=\"MSPage\">\n        <path d=\"M23.5,31.8431458 L17.5852419,25.9283877 C16.0248253,24.3679711 13.4910294,24.366835 11.9289322,25.9289322 C10.3700136,27.4878508 10.3665912,30.0234455 11.9283877,31.5852419 L20.4147581,40.0716123 C20.5133999,40.1702541 20.6159315,40.2626649 20.7218615,40.3488435 C22.2835669,41.8725651 24.794234,41.8626202 26.3461564,40.3106978 L43.3106978,23.3461564 C44.8771021,21.7797521 44.8758057,19.2483887 43.3137085,17.6862915 C41.7547899,16.1273729 39.2176035,16.1255422 37.6538436,17.6893022 L23.5,31.8431458 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z\" id=\"Oval-2\" stroke-opacity=\"0.198794158\" stroke=\"#747474\" fill-opacity=\"0.816519475\" fill=\"#FFFFFF\" sketch:type=\"MSShapeGroup\"></path>\n      </g>\n    </svg>\n  </div>\n  <div class=\"dz-error-mark\">\n    <svg width=\"54px\" height=\"54px\" viewBox=\"0 0 54 54\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:sketch=\"http://www.bohemiancoding.com/sketch/ns\">\n      <title>Error</title>\n      <defs></defs>\n      <g id=\"Page-1\" stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\" sketch:type=\"MSPage\">\n        <g id=\"Check-+-Oval-2\" sketch:type=\"MSLayerGroup\" stroke=\"#747474\" stroke-opacity=\"0.198794158\" fill=\"#FFFFFF\" fill-opacity=\"0.816519475\">\n          <path d=\"M32.6568542,29 L38.3106978,23.3461564 C39.8771021,21.7797521 39.8758057,19.2483887 38.3137085,17.6862915 C36.7547899,16.1273729 34.2176035,16.1255422 32.6538436,17.6893022 L27,23.3431458 L21.3461564,17.6893022 C19.7823965,16.1255422 17.2452101,16.1273729 15.6862915,17.6862915 C14.1241943,19.2483887 14.1228979,21.7797521 15.6893022,23.3461564 L21.3431458,29 L15.6893022,34.6538436 C14.1228979,36.2202479 14.1241943,38.7516113 15.6862915,40.3137085 C17.2452101,41.8726271 19.7823965,41.8744578 21.3461564,40.3106978 L27,34.6568542 L32.6538436,40.3106978 C34.2176035,41.8744578 36.7547899,41.8726271 38.3137085,40.3137085 C39.8758057,38.7516113 39.8771021,36.2202479 38.3106978,34.6538436 L32.6568542,29 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z\" id=\"Oval-2\" sketch:type=\"MSShapeGroup\"></path>\n        </g>\n      </g>\n    </svg>\n  </div>\n</div>"
+      previewTemplate:
+      '<div class="dz-preview dz-file-preview">' +
+        '<div class="dz-image"><img data-dz-thumbnail /></div>' +
+        '<div class="dz-details">' +
+          '<div class="dz-size"><span data-dz-size></span></div>' +
+          '<div class="dz-filename"><span data-dz-name></span></div>' +
+        '</div>' +
+        '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
+        '<div class="dz-error-message"><span data-dz-errormessage></span></div>' +
+        '<div class="dz-success-mark">' +
+          '<svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
+            '<title>Check</title>' +
+            '<defs></defs>' +
+            '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">' +
+              '<path d="M23.5,31.8431458 L17.5852419,25.9283877 C16.0248253,24.3679711 13.4910294,24.366835 11.9289322,25.9289322 C10.3700136,27.4878508 10.3665912,30.0234455 11.9283877,31.5852419 L20.4147581,40.0716123 C20.5133999,40.1702541 20.6159315,40.2626649 20.7218615,40.3488435 C22.2835669,41.8725651 24.794234,41.8626202 26.3461564,40.3106978 L43.3106978,23.3461564 C44.8771021,21.7797521 44.8758057,19.2483887 43.3137085,17.6862915 C41.7547899,16.1273729 39.2176035,16.1255422 37.6538436,17.6893022 L23.5,31.8431458 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z" id="Oval-2" stroke-opacity="0.198794158" stroke="#747474" fill-opacity="0.816519475" fill="#FFFFFF" sketch:type="MSShapeGroup"></path>' +
+            '</g>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="dz-error-mark">' +
+          '<svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
+            '<title>Error</title>' +
+            '<defs></defs>' +
+            '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">' +
+              '<g id="Check-+-Oval-2" sketch:type="MSLayerGroup" stroke="#747474" stroke-opacity="0.198794158" fill="#FFFFFF" fill-opacity="0.816519475">' +
+                '<path d="M32.6568542,29 L38.3106978,23.3461564 C39.8771021,21.7797521 39.8758057,19.2483887 38.3137085,17.6862915 C36.7547899,16.1273729 34.2176035,16.1255422 32.6538436,17.6893022 L27,23.3431458 L21.3461564,17.6893022 C19.7823965,16.1255422 17.2452101,16.1273729 15.6862915,17.6862915 C14.1241943,19.2483887 14.1228979,21.7797521 15.6893022,23.3461564 L21.3431458,29 L15.6893022,34.6538436 C14.1228979,36.2202479 14.1241943,38.7516113 15.6862915,40.3137085 C17.2452101,41.8726271 19.7823965,41.8744578 21.3461564,40.3106978 L27,34.6568542 L32.6538436,40.3106978 C34.2176035,41.8744578 36.7547899,41.8726271 38.3137085,40.3137085 C39.8758057,38.7516113 39.8771021,36.2202479 38.3106978,34.6538436 L32.6568542,29 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z" id="Oval-2" sketch:type="MSShapeGroup"></path>' +
+              '</g>' +
+            '</g>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="dz-resume-mark">' +
+          '<svg width="54px" height="54px" viewBox="0 0 253 253" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
+            '<title>Resume</title>' +
+            '<defs></defs>' +
+            '<g id="Welcome" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">' +
+            '<path d="M126.5,253 C196.364021,253 253,196.364021 253,126.5 C253,56.6359792 196.364021,0 126.5,0 C56.6359792,0 0,56.6359792 0,126.5 C0,196.364021 56.6359792,253 126.5,253 Z M82.678324,213.191925 C76.9189197,216.471979 72.25,213.761465 72.25,207.13597 L72.25,45.8640298 C72.25,39.2393642 76.9235422,36.5273677 82.678324,39.8007434 L224.571676,120.511057 C230.33108,123.787062 230.326458,129.10443 224.571676,132.381852 L82.678324,213.191925 Z" id="Oval-8" fill="#FFFFFF" sketch:type="MSShapeGroup"></path>' +
+            '</g>' +
+          '</svg>' +
+        '</div>' +
+    '</div>',
     };
 
     function Dropzone(element, options) {
@@ -1564,6 +1658,13 @@
       }
     };
 
+    Dropzone.prototype.pauseFile = function(file) {
+      if (file.status === Dropzone.UPLOADING) {
+        file.status = Dropzone.PAUSED;
+        this.emit("pausing", file);
+      }
+    };
+
     Dropzone.prototype.removeAllFiles = function(cancelIfNecessary) {
       var file, _i, _len, _ref;
       if (cancelIfNecessary == null) {
@@ -1650,7 +1751,7 @@
       }
       // Attempt to finish uploads
       activeFiles = this.getActiveFiles();
-      while (file = activeFiles.shift()) {
+      while ((file = activeFiles.shift())) {
         if (file.upload.chunksSuccessful()) {
           this._finishUpload(file);
         }
@@ -1686,15 +1787,9 @@
           groupedFile = groupedFiles[_j];
           this.emit("canceled", groupedFile);
         }
-        if (this.options.uploadMultiple) {
-          this.emit("canceledmultiple", groupedFiles);
-        }
       } else if ((_ref = file.status) === Dropzone.ADDED || _ref === Dropzone.QUEUED) {
         file.status = Dropzone.CANCELED;
         this.emit("canceled", file);
-        if (this.options.uploadMultiple) {
-          this.emit("canceledmultiple", [file]);
-        }
       }
       return this.processQueue();
     };
@@ -1733,7 +1828,7 @@
             return;
           }
           if(e.target.status / 100 != 2) {
-            return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.status), e)
+            return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e)
           }
           file.upload.setChunkComplete(chunkNum);
           // update the last_progress_time for the watcher interval
@@ -1749,7 +1844,7 @@
           if (file.status === Dropzone.CANCELED) {
             return;
           }
-          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.status), e)
+          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e);
         };
       })(this, file, chunkNum);
 
@@ -1769,19 +1864,15 @@
           } else if (e.target.status == 400 && e.target.responseText.indexOf("EntityTooSmall") !== -1) {
             // Recursive. Check again for missing parts and attempt to send.
             file.upload.finishUpload(load_callback, function() { _this.processQueue(); });
-          } else if(e.target.status == 404) {
-            // 404 = NoSuchUpload - restart from the beginning. yup.
-            file.upload.reset();
-            file.status = Dropzone.QUEUED;
-            _this.processQueue();
+          } else {
+            _this._errorProcessing(file, e.target.responseText, e.target.status), e);
           }
         }
       })(this, file);
 
       var error_callback = (function(_this, file) {
         return function(e) {
-          file.status = Dropzone.QUEUED;
-          _this.processQueue();
+          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e);
         }
       })(this, file);
 
@@ -1796,25 +1887,13 @@
         this.emit("success", file, responseText, e);
         this.emit("complete", file);
       }
-      if (this.options.uploadMultiple) {
-        this.emit("successmultiple", files, responseText, e);
-        this.emit("completemultiple", files);
-      }
       return this.processQueue();
     };
 
-    Dropzone.prototype._errorProcessing = function(files, message, xhr) {
-      var file, _i, _len;
-      for (_i = 0, _len = files.length; _i < _len; _i++) {
-        file = files[_i];
-        file.status = Dropzone.ERROR;
-        this.emit("error", file, message, xhr);
-        this.emit("complete", file);
-      }
-      if (this.options.uploadMultiple) {
-        this.emit("errormultiple", files, message, xhr);
-        this.emit("completemultiple", files);
-      }
+    Dropzone.prototype._errorProcessing = function(file, message, xhr) {
+      file.status = Dropzone.ERROR;
+      this.emit("error", file, message, xhr);
+      this.emit("complete", file);
       return this.processQueue();
     };
 
@@ -2044,6 +2123,8 @@
   Dropzone.UPLOADING = "uploading";
 
   Dropzone.PROCESSING = Dropzone.UPLOADING;
+
+  Dropzone.PAUSED = "paused";
 
   Dropzone.FINISHING = "finishing";
 

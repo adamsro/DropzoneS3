@@ -288,7 +288,7 @@
       -ms-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
       -o-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
       animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1); }
-    .dropzone .dz-preview .dz-success-mark, .dropzone .dz-preview .dz-error-mark {
+    .dropzone .dz-preview .dz-success-mark, .dropzone .dz-preview .dz-error-mark, .dropzone .dz-preview .dz-resume-mark {
       pointer-events: none;
       opacity: 0;
       z-index: 500;
@@ -298,7 +298,7 @@
       left: 50%;
       margin-left: -27px;
       margin-top: -27px; }
-      .dropzone .dz-preview .dz-success-mark svg, .dropzone .dz-preview .dz-error-mark svg {
+      .dropzone .dz-preview .dz-success-mark svg, .dropzone .dz-preview .dz-error-mark svg, .dropzone .dz-preview .dz-resume-mark svg {
         display: block;
         width: 54px;
         height: 54px; }
@@ -386,3 +386,5 @@
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
         border-bottom: 6px solid #be2626; }
+
+/*# sourceMappingURL=dropzone.css.map */

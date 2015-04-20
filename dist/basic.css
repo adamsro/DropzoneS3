@@ -28,7 +28,7 @@
       display: block; }
     .dropzone .dz-preview.dz-success .dz-success-mark {
       display: block; }
-    .dropzone .dz-preview .dz-error-mark, .dropzone .dz-preview .dz-success-mark {
+    .dropzone .dz-preview .dz-error-mark, .dropzone .dz-preview .dz-success-mark, .dropzone .dz-preview .dz-resume-mark {
       position: absolute;
       display: none;
       left: 30px;
@@ -37,3 +37,8 @@
       height: 58px;
       left: 50%;
       margin-left: -27px; }
+    .dropzone .dz-preview .dz-pause-resume:after {
+      content: "\000A";
+      white-space: pre; }
+
+/*# sourceMappingURL=basic.css.map */
