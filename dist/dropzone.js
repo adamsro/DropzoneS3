@@ -206,7 +206,7 @@
       auth: auth,
       key: key,
       method: "HEAD",
-      querystring: "",
+      querystring: {},
       headers: {},
       payload: "",
       load_callback: function(e) {
@@ -508,19 +508,14 @@
       "removedfile",
       "thumbnail",
       "error",
-      "errormultiple",
       "processing",
-      "processingmultiple",
+      "enqueuing",
       "uploadprogress",
       "totaluploadprogress",
       "sending",
-      "sendingmultiple",
       "success",
-      "successmultiple",
       "canceled",
-      "canceledmultiple",
       "complete",
-      "completemultiple",
       "reset",
       "maxfilesexceeded",
       "maxfilesreached",
@@ -550,6 +545,7 @@
       ignoreHiddenFiles: true,
       acceptedFiles: null,
       acceptedMimeTypes: null,
+      autoProcess: true,
       autoQueue: true,
       addRemoveLinks: true,
       fileResumable: true,
@@ -755,7 +751,6 @@
           return _results;
         }
       },
-      errormultiple: noop,
       processing: function(file) {
         if (file.previewElement) {
           file.previewElement.classList.add("dz-processing");
@@ -764,6 +759,7 @@
           }
         }
       },
+      enqueuing: noop,
       pausing: function(file) {
         if (this.options.fileResumable) {
           file._resumeLink = Dropzone.createElement("<a class=\"dz-resume\" href=\"javascript:undefined;\" data-dz-resume>" + this.options.dictResumeUpload + "</a>");
@@ -773,11 +769,7 @@
             return function(e) {
               e.preventDefault();
               e.stopPropagation();
-              if (file.status === Dropzone.PAUSED) {
-                file.status = Dropzone.UPLOADING;
-                _this.emit("resuming", file);
-                _this.processQueue();
-              }
+              _this.resumeFile(file);
             };
           })(this);
 
@@ -788,7 +780,6 @@
         if (this.options.fileResumable && file._resumeLink) {
           file._resumeLink.parentNode.removeChild(file._resumeLink);
         }
-        this.processQueue();
       },
       processingmultiple: noop,
       uploadprogress: function(file, progress, bytesSent) {
@@ -1599,22 +1590,44 @@
             chunks = [];
             uploadId = null;
           },
-          finishUpload: function(load_callback, error_callback, partsIncompleteCallback) {
+          finishUpload: function(success_callback, parts_incomplete_callback, error_callback) {
             // Check that we uploaded all the chunks and upload any missing ones if we didnt.
             AmazonXHR.list(auth, file, s3Filename, uploadId, chunkSize, function(parts) {
               if (parts.length != chunks.length) {
+                // Amazon does not have all the parts
                 updateChunks(parts);
-                if (typeof(partsIncompleteCallback) === "function") {
-                  partsIncompleteCallback();
-                }
+                parts_incomplete_callback();
               } else {
-                AmazonXHR.finish(auth, file, s3Filename, uploadId, parts, chunkSize, load_callback, error_callback);
+                AmazonXHR.finish(auth, file, s3Filename, uploadId, parts, chunkSize, function(e) {
+                  if (e.target.status / 100 == 2) {
+                    success_callback(e);
+                  } else if (e.target.status == 400 && e.target.responseText.indexOf("EntityTooSmall") !== -1) {
+                    // Recursive. Check again for missing parts and attempt to send.
+                    file.upload.finishUpload(success_callback, parts_incomplete_callback, error_callback);
+                  } else if (e.target.status === 404 && e.target.responseText.indexOf("NoSuchUpload") !== -1) {
+                    // The specified multipart upload does not exist. The upload ID
+                    // might be invalid, or the multipart upload might have been aborted or completed.
+                    AmazonXHR.exists(auth, s3Filename, function(exists) {
+                      return (exists ? success_callback(e) : error_callback(e));
+                    }, error_callback);
+                  } else {
+                    error_callback(e);
+                  }
+                }, error_callback);
+              }
+            }, function(e) {
+              // List request did not return parts
+              if (e.target.status == 404 && e.target.responseText.indexOf("NoSuchUpload") !== -1) {
+                AmazonXHR.exists(auth, s3Filename, function(exists) {
+                  return (exists ? success_callback(e) : error_callback(e));
+                }, error_callback);
+              } else {
+                error_callback(e);
               }
             });
           }
         };
       })(file, this);
-
 
       this.files.push(file);
       file.status = Dropzone.ADDED;
@@ -1627,8 +1640,8 @@
             _this._errorProcessing(file, error);
           } else {
             file.accepted = true;
-            if (_this.options.autoQueue) {
-              _this.enqueueFile(file);
+            if (_this.options.autoProcess) {
+              _this.processFile(file);
             }
           }
           return _this._updateMaxFilesReachedClass();
@@ -1636,16 +1649,7 @@
       })(this));
     };
 
-    Dropzone.prototype.enqueueFiles = function(files) {
-      var file, _i, _len;
-      for (_i = 0, _len = files.length; _i < _len; _i++) {
-        file = files[_i];
-        this.enqueueFile(file);
-      }
-      return null;
-    };
-
-    Dropzone.prototype.enqueueFile = function(file) {
+    Dropzone.prototype.processFile = function(file) {
       var _this = this,
         xhr, params;
       if (file.status === Dropzone.ADDED && file.accepted === true) {
@@ -1656,7 +1660,6 @@
           "filesize": file.size,
           "last_modified": file.lastModifiedDate
         });
-        xhr.open("GET", "/?action=sign&" + params, true);
         xhr.onload = function() {
           if (xhr.readyState !== 4) {
             return;
@@ -1667,14 +1670,15 @@
           var json = JSON.parse(xhr.responseText);
           // Initiate multipart upload with Amazon.
           file.upload.init(json, json.unique_filename, false, _this.options.maxChunkSize, function(status) {
+            file.processed = true;
             if (status)
               file.status = Dropzone.SUCCESS;
             else {
-              file.status = Dropzone.QUEUED;
+              file.status = Dropzone.PROCESSED;
+              if (_this.options.autoQueue) {
+                _this.enqueueFile(file);
+              }
             }
-            return setTimeout(function() {
-              return _this.processQueue();
-            }, 0);
           }, function(e) {
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
           });
@@ -1682,9 +1686,43 @@
         xhr.onerror = function(e) {
           return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
         };
+        file.status = Dropzone.PROCESSING;
+        this.emit("processing", file, xhr, params);
+        xhr.open("GET", "/?action=sign&" + params, true);
         xhr.send();
       } else {
-        throw new Error("This file can't be queued because it has already been processed or was rejected.");
+        throw new Error("This file can't be processed because it has already been processed or was rejected.");
+      }
+    };
+
+    Dropzone.prototype.enqueueFile = function(file) {
+      var _this = this;
+      if (file.status === Dropzone.PROCESSED) {
+        this.emit("enqueuing", file);
+        file.status = Dropzone.QUEUED;
+        return setTimeout(function() {
+          return _this.processQueue();
+        }, 0);
+      } else {
+        throw new Error("This file can't be enqueued because it has not been processed or was rejected.");
+      }
+    };
+
+    Dropzone.prototype.resumeFile = function(file) {
+      var _this = this;
+      if (file.status === Dropzone.PAUSED) {
+        _this.emit("resuming", file);
+        if (file.accepted && !file.processed) {
+          file.status = Dropzone.ADDED;
+          return setTimeout(function() {
+            return _this.processFile(file);
+          }, 0);
+        } else {
+          file.status = Dropzone.UPLOADING;
+          return setTimeout(function() {
+            return _this.processQueue();
+          }, 0);
+        }
       }
     };
 
@@ -1751,7 +1789,7 @@
 
     Dropzone.prototype.createThumbnail = function(file, callback) {
       var fileReader;
-      fileReader = new FileReader;
+      fileReader = new FileReader();
       fileReader.onload = (function(_this) {
         return function() {
           if (file.type === "image/svg+xml") {
@@ -1927,31 +1965,19 @@
       var _this = this;
 
       file.status = Dropzone.FINISHING;
+      this.emit("finishing", file);
 
-      var load_callback = (function(_this, file) {
+      var success_callback = (function(_this, file) {
         return function(e) {
-          if (e.target.status / 100 == 2) {
-            _this._finished([file], e.target.responseText, e);
-          } else if (e.target.status == 400 && e.target.responseText.indexOf("EntityTooSmall") !== -1) {
-            // Recursive. Check again for missing parts and attempt to send.
-            file.upload.finishUpload(load_callback, function() {
-              _this.processQueue();
-            });
-          } else if (e.target.status === 404 && e.target.responseText.indexOf("NoSuchUpload") !== -1) {
-              // The specified multipart upload does not exist. The upload ID
-              // might be invalid, or the multipart upload might have been aborted or completed.
-              AmazonXHR.exists(auth, s3Filename, function(exists) {
-                if (exists) {
-                  _this._finished([file], e.target.responseText, e);
-                } else {
-                  _this._errorProcessing(file, e.target.responseText, e.target);
-                }
-              });
-          } else {
-            _this._errorProcessing(file, e.target.responseText, e.target);
-          }
+          return _this._finished(file, e.target.responseText, e);
         }
       })(this, file);
+
+      var parts_incomplete_callback = (function(_this) {
+        return function() {
+          return _this.processQueue();
+        }
+      })(this);
 
       var error_callback = (function(_this, file) {
         return function(e) {
@@ -1959,42 +1985,44 @@
         }
       })(this, file);
 
-      file.upload.finishUpload(load_callback, error_callback, function() {
-        _this.processQueue();
-      });
+      file.upload.finishUpload(success_callback, parts_incomplete_callback, error_callback);
     };
 
-    Dropzone.prototype._finished = function(files, responseText, e) {
-      var file, _i, _len;
-      for (_i = 0, _len = files.length; _i < _len; _i++) {
-        file = files[_i];
-        file.status = Dropzone.SUCCESS;
-        this.emit("success", file, responseText, e);
-        this.emit("complete", file);
-      }
-      return this.processQueue();
+    Dropzone.prototype._finished = function(file, responseText, e) {
+      var _this = this;
+      file.status = Dropzone.SUCCESS;
+      this.emit("success", file, responseText, e);
+      this.emit("complete", file);
+      return setTimeout(function() {
+        return _this.processQueue();
+      }, 0);
     };
 
     Dropzone.prototype._errorProcessing = function(file, message, xhr) {
-      if (xhr.status === 0 && this.options.fileResumable) {
+      var _this = this,
+        isInResumableState = !!(file.status == Dropzone.PROCESSING || file.status == Dropzone.UPLOADING || file.status == Dropzone.FINISHING);
+
+      if (xhr.status === 0 && file.status == Dropzone.PAUSED) {
+        return;
+      } else if (xhr.status === 0 && this.options.fileResumable && isInResumableState) {
         // Connection error: pause download.
-        if (file.status == Dropzone.UPLOADING) {
-          file.status = Dropzone.PAUSED;
-          this.emit("pausing", file);
-        }
+        file.status = Dropzone.PAUSED;
+        this.emit("pausing", file);
       } else {
         file.status = Dropzone.ERROR;
         this.emit("error", file, message, xhr);
         this.emit("complete", file);
       }
-      return this.processQueue();
+      return setTimeout(function() {
+        return _this.processQueue();
+      }, 0);
     };
 
     return Dropzone;
 
   })(Emitter);
 
-  Dropzone.version = "4.0.1";
+  Dropzone.version = "1.0";
 
   Dropzone.options = {};
 
@@ -2211,11 +2239,9 @@
 
   Dropzone.QUEUED = "queued";
 
-  Dropzone.ACCEPTED = Dropzone.QUEUED;
-
   Dropzone.UPLOADING = "uploading";
 
-  Dropzone.PROCESSING = Dropzone.UPLOADING;
+  Dropzone.PROCESSED = "processed";
 
   Dropzone.PAUSED = "paused";
 

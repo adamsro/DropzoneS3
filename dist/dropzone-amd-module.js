@@ -139,7 +139,6 @@
       thumbnailHeight: 120,
       filesizeBase: 1000,
       maxFiles: null,
-      filesizeBase: 1000,
       params: {},
       clickable: true,
       ignoreHiddenFiles: true,
@@ -1614,11 +1613,11 @@
 
   Dropzone.QUEUED = "queued";
 
-  Dropzone.ACCEPTED = Dropzone.QUEUED;
+  Dropzone.ACCEPTED = "accepted";
 
   Dropzone.UPLOADING = "uploading";
 
-  Dropzone.PROCESSING = Dropzone.UPLOADING;
+  Dropzone.PROCESSING = "processing";
 
   Dropzone.CANCELED = "canceled";
 
