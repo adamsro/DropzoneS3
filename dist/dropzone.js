@@ -215,6 +215,20 @@
       error_callback: error_callback,
     }).send();
   };
+  AmazonXHR.abort = function(auth, key, uploadId, callback, error_callback) {
+    return new AmazonXHR({
+      auth: auth,
+      key: key,
+      method: "DELETE",
+      querystring: {'uploadId': uploadId},
+      headers: {},
+      payload: "",
+      load_callback: function(e) {
+        return (e.target.status / 100 == 2) ? callback() : error_callback(e);
+      },
+      error_callback: error_callback,
+    }).send();
+  };
   AmazonXHR.prototype = {
     send: function(callback) {
       var self = this;
@@ -1422,6 +1436,7 @@
     };
 
     Dropzone.prototype.addFile = function(file, _this) {
+      file.processed = false;
       file.upload = (function(file) {
         // private vars
         var auth,
@@ -1548,7 +1563,7 @@
             chunk.status = CHUNK_UPLOADING;
             chunk.progressDate = new Date();
             AmazonXHR.uploadChunk(auth, s3Filename, uploadId, chunkNum, file.slice(start, end), callbacks, function(xhr) {
-              // chunk.xhr = xhr;
+              chunk.xhr = xhr;
               // the watcher interval; it cancels the xhr if it times out
               chunk.interval = setInterval((function(xhr) {
                 if (chunk.progressDate && (new Date() - chunk.progressDate) > 15000) { // 15s
@@ -1589,6 +1604,15 @@
             auth = null;
             chunks = [];
             uploadId = null;
+          },
+          abort: function(success_callback, error_callback) {
+            for (var i = chunks.length - 1; i >= 0; i--) {
+              if(chunks[i].hasOwnProperty('xhr')) {
+                chunks[i].xhr.abort();
+              }
+            }
+            AmazonXHR.abort(auth, s3Filename, uploadId, success_callback, error_callback);
+            this.reset();
           },
           finishUpload: function(success_callback, parts_incomplete_callback, error_callback) {
             // Check that we uploaded all the chunks and upload any missing ones if we didnt.
@@ -1755,8 +1779,10 @@
     };
 
     Dropzone.prototype.removeFile = function(file) {
-      if (file.status === Dropzone.UPLOADING) {
+      if (file.processed === true) {
         this.cancelUpload(file);
+      } else {
+        file.upload.reset();
       }
       this.files = without(this.files, file);
       this.emit("removedfile", file);
@@ -1780,7 +1806,7 @@
       _ref = this.files.slice();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         file = _ref[_i];
-        if (file.status !== Dropzone.UPLOADING || cancelIfNecessary) {
+        if (file.processed === false || cancelIfNecessary) {
           this.removeFile(file);
         }
       }
@@ -1865,39 +1891,16 @@
       }
     };
 
-    Dropzone.prototype._getFilesWithXhr = function(xhr) {
-      var file, files;
-      return files = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.files;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          file = _ref[_i];
-          if (file.xhr === xhr) {
-            _results.push(file);
-          }
-        }
-        return _results;
-      }).call(this);
-    };
-
     Dropzone.prototype.cancelUpload = function(file) {
-      var groupedFile, groupedFiles, _i, _j, _len, _len1, _ref;
-      if (file.status === Dropzone.UPLOADING) {
-        groupedFiles = this._getFilesWithXhr(file.xhr);
-        for (_i = 0, _len = groupedFiles.length; _i < _len; _i++) {
-          groupedFile = groupedFiles[_i];
-          groupedFile.status = Dropzone.CANCELED;
-        }
-        file.xhr.abort();
-        for (_j = 0, _len1 = groupedFiles.length; _j < _len1; _j++) {
-          groupedFile = groupedFiles[_j];
-          this.emit("canceled", groupedFile);
-        }
-      } else if ((_ref = file.status) === Dropzone.ADDED || _ref === Dropzone.QUEUED) {
-        file.status = Dropzone.CANCELED;
-        this.emit("canceled", file);
-      }
+      // Abort all sending requests and send an abort request to Amazon to deallocate space
+      file.upload.abort(noop, (function(_this, file) {
+        return function(e) {
+          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+        };
+      })(this, file));
+      file.status = Dropzone.CANCELED;
+      this.emit("canceled", file);
+
       return this.processQueue();
     };
 
@@ -1925,13 +1928,10 @@
         };
       })(this, file, chunkNum);
 
-      callbacks.state_change_callback = (function(_this, file, chunkNum) {
+      callbacks.load_callback = (function(_this, file, chunkNum) {
         return function(e) {
           var _ref;
           if (file.status === Dropzone.CANCELED) {
-            return;
-          }
-          if (e.target.readyState !== 4) {
             return;
           }
           if (e.target.status / 100 != 2) {
@@ -1973,11 +1973,12 @@
         }
       })(this, file);
 
-      var parts_incomplete_callback = (function(_this) {
+      var parts_incomplete_callback = (function(_this, file) {
         return function() {
+          file.status = Dropzone.UPLOADING;
           return _this.processQueue();
         }
-      })(this);
+      })(this, file);
 
       var error_callback = (function(_this, file) {
         return function(e) {
