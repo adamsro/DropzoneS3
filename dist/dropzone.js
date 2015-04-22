@@ -143,15 +143,6 @@
     }).send();
   };
   AmazonXHR.uploadChunk = function(auth, key, upload_id, chunkNum, chunk, callbacks, xhr_callback) {
-    var callback, error_callback, progress_callback, readystate_callback;
-    if (callbacks instanceof Object) {
-      callback = callbacks.load_callback;
-      error_callback = callbacks.error_callback;
-      progress_callback = callbacks.progress_callback;
-      readystate_callback = callbacks.state_change_callback;
-    } else {
-      callback = callbacks;
-    }
     var querystring = {
       partNumber: chunkNum + 1,
       uploadId: upload_id
@@ -163,10 +154,9 @@
       querystring: querystring,
       headers: {},
       payload: chunk,
-      load_callback: callback,
-      error_callback: error_callback,
-      progress_callback: progress_callback,
-      state_change_callback: readystate_callback
+      load_callback: callbacks.load_callback,
+      error_callback: callbacks.error_callback,
+      progress_callback: callbacks.progress_callback
     })).send(xhr_callback);
   };
   AmazonXHR.finish = function(auth, file, key, upload_id, parts, chunk_size, load_callback, error_callback) {
@@ -220,7 +210,9 @@
       auth: auth,
       key: key,
       method: "DELETE",
-      querystring: {'uploadId': uploadId},
+      querystring: {
+        'uploadId': uploadId
+      },
       headers: {},
       payload: "",
       load_callback: function(e) {
@@ -1554,9 +1546,14 @@
             }
             return true;
           },
-          uploadChunk: function(chunkNum, callbacks) {
+          uploadChunk: function(chunkNum, load_callback, error_callback, progress_callback) {
             // get the start and end bytes for the needed chunk
-            var chunk = chunks[chunkNum],
+            var callbacks = {
+                "load_callback": load_callback,
+                "error_callback": error_callback,
+                "progress_callback": progress_callback
+              },
+              chunk = chunks[chunkNum],
               length = chunkSize,
               start = chunkNum * length,
               end = Math.min(start + length, file.size);
@@ -1570,7 +1567,7 @@
                   clearInterval(chunk.interval);
                   if (file.status == Dropzone.UPLOADING) {
                     xhr.abort();
-                    callbacks.error_callback(xhr);
+                    error_callback(xhr);
                   }
                 }
               })(xhr), 4000); // every 4s
@@ -1607,7 +1604,7 @@
           },
           abort: function(success_callback, error_callback) {
             for (var i = chunks.length - 1; i >= 0; i--) {
-              if(chunks[i].hasOwnProperty('xhr')) {
+              if (chunks[i].hasOwnProperty('xhr')) {
                 chunks[i].xhr.abort();
               }
             }
@@ -1919,7 +1916,7 @@
       file.status = Dropzone.UPLOADING;
       this.emit("processing", file);
 
-      callbacks.progress_callback = (function(_this, file, chunkNum) {
+      var progress_callback = (function(_this, file, chunkNum) {
         return function(e) {
           file.upload.setChunkProgress(chunkNum, e.loaded);
           // update the last_progress_time for the watcher interval
@@ -1928,7 +1925,7 @@
         };
       })(this, file, chunkNum);
 
-      callbacks.load_callback = (function(_this, file, chunkNum) {
+      var load_callback = (function(_this, file, chunkNum) {
         return function(e) {
           var _ref;
           if (file.status === Dropzone.CANCELED) {
@@ -1938,15 +1935,13 @@
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target)
           }
           file.upload.setChunkComplete(chunkNum);
-          // update the last_progress_time for the watcher interval
-          // file.upload.progressDate = new Date();
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
           _this.processQueue();
 
         };
       })(this, file, chunkNum);
 
-      callbacks.error_callback = (function(_this, file, chunkNum) {
+      var error_callback = (function(_this, file, chunkNum) {
         return function(e) {
           if (file.status === Dropzone.CANCELED) {
             return;
@@ -1958,7 +1953,7 @@
       })(this, file, chunkNum);
 
       // this.emit("sending", file, xhr, formData);
-      file.upload.uploadChunk(chunkNum, callbacks);
+      file.upload.uploadChunk(chunkNum, load_callback, error_callback, progress_callback);
     };
 
     Dropzone.prototype._finishUpload = function(file) {
