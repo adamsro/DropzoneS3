@@ -476,13 +476,14 @@
       return chunks;
     };
     // Rebuild our chunk info based on what we receive from Amazon
-    var updateChunks = function(chunks, parts, fileSize, chunkSize) {
-      chunks = initChunkArray(fileSize, chunkSize);
+    var updateChunks = function(parts, fileSize, chunkSize) {
+      var chunks = initChunkArray(fileSize, chunkSize);
       for (var i = 0; i < parts.length; i++) {
         var partNumber = parseInt(parts[i][0], 10);
         chunks[partNumber - 1].status = S3File.CHUNK_SUCCESS;
         chunks[partNumber - 1].bytesSent = chunkSize;
       }
+      return chunks;
     };
 
     S3File.prototype.init = function(auth, key, force, callback, error_callback) {
@@ -503,7 +504,7 @@
         // UploadId was saved in backend. Get the uploaded parts from S3
         AmazonXHR.list(this.auth, this.file, this.key, this.auth.uploadId, this.chunkSize, function(parts) {
           // Got part list from Amazon
-          updateChunks(_this.chunks, parts, _this.file.size, _this.chunkSize);
+          _this.chunks = updateChunks(_this.chunks, parts, _this.file.size, _this.chunkSize);
           // Process the queue
           callback(false);
         }, function(e) {
@@ -642,7 +643,7 @@
       AmazonXHR.list(this.auth, this.file, this.key, this.auth.uploadId, this.chunkSize, function(parts) {
         if (parts.length != _this.chunks.length) {
           // Amazon does not have all the parts
-          updateChunks(_this.chunks, parts, _this.file.size, _this.chunkSize);
+          _this.chunks = updateChunks(_this.chunks, parts, _this.file.size, _this.chunkSize);
           parts_incomplete_callback();
         } else {
           AmazonXHR.finish(_this.auth, _this.file, _this.key, _this.auth.uploadId, parts, _this.chunkSize, function(e) {
@@ -763,6 +764,7 @@
       "dragenter",
       "dragover",
       "dragleave",
+      "duplicate",
       "addedfile",
       "removedfile",
       "thumbnail",
@@ -788,7 +790,7 @@
       method: "post", // TODO remove
       withCredentials: false,
       parallelUploads: 6,
-      // uploadMultiple: false, -- TODO Delete this
+      allowDuplicates: false,
       maxFilesize: 1000 * 10, // 10 GB
       paramName: "file",
       createImageThumbnails: true,
@@ -915,6 +917,16 @@
       paste: noop,
       reset: function() {
         return this.element.classList.remove("dz-started");
+      },
+      duplicate: function(existingFile, newFile) {
+        if (existingFile.previewElement) {
+          var handler = function(e, elapsedTime) {
+            existingFile.previewElement.classList.remove("dz-duplicate-attempt");
+            existingFile.previewElement.removeEventListener('transitionend', handler, true);
+          };
+          existingFile.previewElement.addEventListener('transitionend', handler, true);
+          existingFile.previewElement.classList.add("dz-duplicate-attempt");
+        }
       },
       addedfile: function(file) {
         var node, removeFileEvent, removeLink, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
@@ -1651,9 +1663,36 @@
       });
     };
 
-    Dropzone.prototype.addFile = function(file, _this) {
-      file.upload = new S3File(file, this.options.maxChunkSize);
+    Dropzone.prototype.addFile = function(file) {
+      var _this = this;
+
       file.processed = false;
+      file.isDuplicate = false;
+
+      if (this.options.allowDuplicates === false && this.files.length) {
+        for (var _i = 0, _len = this.files.length; _i < _len; _i++) {
+          var _ref = this.files[_i];
+          if (_ref.name === file.name && _ref.size === file.size && _ref.lastModified === file.lastModified) {
+            // New file being added is probably a duplicate of an existing file.
+            file.isDuplicate = true;
+            switch (_ref.status) {
+              case Dropzone.ERROR:
+                // Remove the old file. Add the new one later.
+                _this.removeFile(_ref);
+                break;
+              case Dropzone.PAUSED:
+                // Attempt to resume original if file is duplicate and original is paused.
+                _this.resumeFile(_ref);
+              default:
+                // Run if Dropzone.PAUSED as well as any other status.
+                this.emit("duplicate", _ref, file);
+                return;
+            }
+          }
+        }
+      }
+
+      file.upload = new S3File(file, this.options.maxChunkSize);
 
       this.files.push(file);
       file.status = Dropzone.ADDED;
@@ -1667,7 +1706,9 @@
           } else {
             file.accepted = true;
             if (_this.options.autoProcess) {
-              _this.processFile(file);
+              setTimeout(function() {
+                return _this.processFile(file);
+              }, 0);
             }
           }
           return _this._updateMaxFilesReachedClass();
@@ -1783,11 +1824,17 @@
         // Get s3 signature from the backend.
         var xhr = new XMLHttpRequest();
 
-        var params = urlParams({
+        var params = {
           "filename": file.name,
           "filesize": file.size,
           "last_modified": file.lastModifiedDate
-        });
+        };
+        if (file.isDuplicate === true) {
+          // Start a fresh download; don't get uploadId from server.
+          params.force = true;
+        }
+        params = urlParams(params);
+
         xhr.onload = function() {
           if (xhr.readyState !== 4) {
             return;
@@ -1889,7 +1936,9 @@
           }
           file.upload.setChunkComplete(chunkNum);
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
-          _this.processQueue();
+          setTimeout(function() {
+            _this.processQueue();
+          }, 0);
 
         };
       })(this, file, chunkNum);
@@ -1962,7 +2011,7 @@
 
     Dropzone.prototype.removeAllFiles = function(cancelIfNecessary) {
       var file, _i, _len, _ref;
-      if (cancelIfNecessary == null) {
+      if (cancelIfNecessary === null) {
         cancelIfNecessary = false;
       }
       _ref = this.files.slice();
@@ -1984,20 +2033,20 @@
       var success_callback = (function(_this, file) {
         return function(e) {
           return _this._finished(file, e.target.responseText, e);
-        }
+        };
       })(this, file);
 
       var parts_incomplete_callback = (function(_this, file) {
         return function() {
           file.status = Dropzone.UPLOADING;
           return _this.processQueue();
-        }
+        };
       })(this, file);
 
       var error_callback = (function(_this, file) {
         return function(e) {
           return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
-        }
+        };
       })(this, file);
 
       file.upload.finishUpload(success_callback, parts_incomplete_callback, error_callback);
@@ -2037,7 +2086,7 @@
 
   })(Emitter);
 
-  Dropzone.version = "0.5";
+  Dropzone.version = "0.1";
 
   Dropzone.options = {};
 
@@ -2055,7 +2104,7 @@
     if (typeof element === "string") {
       element = document.querySelector(element);
     }
-    if ((element != null ? element.dropzone : void 0) == null) {
+    if ((element !== null ? element.dropzone : void 0) === null) {
       throw new Error("No Dropzone found for given element. This is probably because you're trying to access it before Dropzone had the time to initialize. Use the `init` option to setup any additional observers on your Dropzone.");
     }
     return element.dropzone;
@@ -2150,7 +2199,7 @@
     if (element === container) {
       return true;
     }
-    while (element = element.parentNode) {
+    while ((element = element.parentNode)) {
       if (element === container) {
         return true;
       }
@@ -2162,10 +2211,10 @@
     var element;
     if (typeof el === "string") {
       element = document.querySelector(el);
-    } else if (el.nodeType != null) {
+    } else if (el.nodeType !== null) {
       element = el;
     }
-    if (element == null) {
+    if (element === null) {
       throw new Error("Invalid `" + name + "` option provided. Please provide a CSS selector or a plain HTML element.");
     }
     return element;
@@ -2191,10 +2240,10 @@
         el = _ref[_j];
         elements.push(el);
       }
-    } else if (els.nodeType != null) {
+    } else if (els.nodeType !== null) {
       elements = [els];
     }
-    if (!((elements != null) && elements.length)) {
+    if (!((elements !== null) && elements.length)) {
       throw new Error("Invalid `" + name + "` option provided. Please provide a CSS selector, a plain HTML element or a list of those.");
     }
     return elements;
@@ -2203,7 +2252,7 @@
   Dropzone.confirm = function(question, accepted, rejected) {
     if (window.confirm(question)) {
       return accepted();
-    } else if (rejected != null) {
+    } else if (rejected !== null) {
       return rejected();
     }
   };

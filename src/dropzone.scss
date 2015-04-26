@@ -148,6 +148,10 @@
     margin: 16px;
     min-height: 100px;
 
+    -moz-transition: -moz-transform 0.5s ease-in-out;
+    -webkit-transition: -webkit-transform 0.5s ease-in-out;
+    -o-transition: -o-transform 0.5s ease-in-out;
+
     &:hover {
       // Making sure that always the hovered preview element is on top
       z-index: 1000;
@@ -405,6 +409,12 @@
         border-right: 6px solid transparent;
         border-bottom: 6px solid $color;
       }
+    }
+
+    &.dz-duplicate-attempt {
+      -moz-transform: scale(1.2);
+      -webkit-transform: scale(1.2);
+      -o-transform: scale(1.2);
     }
 
   }

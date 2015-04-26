@@ -11,7 +11,10 @@
     position: relative;
     display: inline-block;
     width: 120px;
-    margin: 0.5em; }
+    margin: 0.5em;
+    -moz-transition: -moz-transform 0.5s ease-in-out;
+    -webkit-transition: -webkit-transform 0.5s ease-in-out;
+    -o-transition: -o-transform 0.5s ease-in-out; }
     .dropzone .dz-preview .dz-progress {
       display: block;
       height: 15px;
@@ -37,8 +40,9 @@
       height: 58px;
       left: 50%;
       margin-left: -27px; }
-    .dropzone .dz-preview .dz-pause-resume:after {
-      content: "\000A";
-      white-space: pre; }
+    .dropzone .dz-preview .dz-duplicate-attempt {
+      -moz-transform: scale(1.2);
+      -webkit-transform: scale(1.2);
+      -o-transform: scale(1.2); }
 
 /*# sourceMappingURL=basic.css.map */

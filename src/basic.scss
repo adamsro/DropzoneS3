@@ -33,6 +33,9 @@
     display: inline-block;
     width: 120px;
     margin: 0.5em;
+    -moz-transition: -moz-transform 0.5s ease-in-out;
+    -webkit-transition: -webkit-transform 0.5s ease-in-out;
+    -o-transition: -o-transform 0.5s ease-in-out;
 
     .dz-progress {
       display: block;
@@ -71,9 +74,16 @@
       left: 50%;
       margin-left: -(54px/2);
     }
-    .dz-pause-resume:after {
-      content:"\000A";
-      white-space: pre;
+
+    // .dz-pause-resume:after {
+    //   content:"\000A";
+    //   white-space: pre;
+    // }
+
+    .dz-duplicate-attempt {
+      -moz-transform: scale(1.2);
+      -webkit-transform: scale(1.2);
+      -o-transform: scale(1.2);
     }
   }
 
