@@ -161,6 +161,7 @@
       url = url.slice(0, -1); // remove extra ampersand
 
       var xhr = new XMLHttpRequest();
+      xhr.timeout = self.settings.timeout || 0;
       xhr.addEventListener("load", self.settings.load_callback, true);
       xhr.addEventListener("readystatechange", self.settings.state_change_callback);
       xhr.addEventListener("error", self.settings.error_callback, true);
@@ -295,6 +296,8 @@
       payload: "",
       load_callback: load_callback,
       error_callback: error_callback,
+      timeout: 15000, // 15sec
+      timeout_callback: error_callback,
     }).send();
   };
 
@@ -359,7 +362,9 @@
         } else {
           callback(parts);
         }
-      }
+      },
+      timeout: 15000, // 15sec
+      timeout_callback: error_callback,
     }).send();
   };
 
@@ -411,6 +416,8 @@
       payload: data,
       load_callback: load_callback,
       error_callback: error_callback,
+      timeout: 15000, // 15sec
+      timeout_callback: error_callback,
     }).send();
   };
 
@@ -426,6 +433,8 @@
         return (e.target.status / 100 == 2) ? callback(true) : callback(false);
       },
       error_callback: error_callback,
+      timeout: 15000, // 15sec
+      timeout_callback: error_callback,
     }).send();
   };
 
@@ -443,6 +452,8 @@
         return (e.target.status / 100 == 2) ? callback() : error_callback(e);
       },
       error_callback: error_callback,
+      timeout: 15000, // 15sec
+      timeout_callback: error_callback,
     }).send();
   };
 
@@ -812,14 +823,17 @@
       fileResumable: true,
       previewsContainer: null,
       capture: null,
+      retryAttempts: 2,
+      retryInterval: 10, // 10 seconds
       dictDefaultMessage: "Drop files here to upload",
       dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
       dictFallbackText: "Please use the fallback form below to upload your files like in the olden days.",
       dictFileTooBig: "File is too big ({{filesize}}MiB). Max filesize: {{maxFilesize}}MiB.",
       dictInvalidFileType: "You can't upload files of this type.",
       dictResponseError: "Server responded with {{statusCode}} code.",
+      dictConnectionError: "Connection error. will retry upload in {{seconds}} seconds.",
       dictCancelUpload: "Cancel upload",
-      dictResumeUpload: "Resume upload",
+      dictResumeUpload: "Connection Error. Click to resume.",
       dictCancelUploadConfirmation: "Are you sure you want to cancel this upload?",
       dictRemoveFile: "Remove file",
       dictRemoveFileConfirmation: null,
@@ -1031,26 +1045,39 @@
         }
       },
       enqueuing: noop,
-      pausing: function(file) {
-        if (this.options.fileResumable) {
-          file._resumeLink = Dropzone.createElement("<a class=\"dz-resume\" href=\"javascript:undefined;\" data-dz-resume>" + this.options.dictResumeUpload + "</a>");
-          file.previewElement.appendChild(file._resumeLink);
+      pausing: function(file, message) {
+        if (!this.options.fileResumable) {
+          return false;
+        }
+        // file._resumeLink = Dropzone.createElement("<a class=\"dz-resume\" href=\"javascript:undefined;\" data-dz-resume>" + this.options.dictResumeUpload + "</a>");
+        // file.previewElement.appendChild(file._resumeLink);
 
-          var resumeFileEvent = (function(_this) {
-            return function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              _this.resumeFile(file);
-            };
-          })(this);
+        var resumeFileEvent = (function(_this, file) {
+          return function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            file.previewElement.removeEventListener("click", resumeFileEvent);
+            _this.resumeFile(file);
+          };
+        })(this, file);
 
-          file._resumeLink.addEventListener("click", resumeFileEvent);
+        file.previewElement.classList.add("dz-paused");
+        file.previewElement.addEventListener("click", resumeFileEvent);
+
+        if (!message) { message = ''; }
+        if (typeof message !== "String" && message.error) {
+          message = message.error;
+        }
+        var _ref = file.previewElement.querySelectorAll("[data-dz-pausemessage]");
+        for (var _i = 0, _len = _ref.length; _i < _len; _i++) {
+          _ref[_i].textContent = message;
         }
       },
       resuming: function(file) {
-        if (this.options.fileResumable && file._resumeLink) {
-          file._resumeLink.parentNode.removeChild(file._resumeLink);
+        if (!this.options.fileResumable) {
+          return false;
         }
+        file.previewElement.classList.remove("dz-paused");
       },
       processingmultiple: noop,
       uploadprogress: function(file, progress, bytesSent) {
@@ -1102,6 +1129,7 @@
         '</div>' +
         '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
         '<div class="dz-error-message"><span data-dz-errormessage></span></div>' +
+        '<div class="dz-pause-message"><span data-dz-pausemessage></span></div>' +
         '<div class="dz-success-mark">' +
         '<svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
         '<title>Check</title>' +
@@ -1126,7 +1154,7 @@
         '<svg width="54px" height="54px" viewBox="0 0 253 253" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
         '<title>Resume</title>' +
         '<defs></defs>' +
-        '<g id="Welcome" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">' +
+        '<g id="Check-+-Oval-2" sketch:type="MSLayerGroup" stroke="#747474" stroke-opacity="0.198794158" fill="#FFFFFF" fill-opacity="0.816519475">' +
         '<path d="M126.5,253 C196.364021,253 253,196.364021 253,126.5 C253,56.6359792 196.364021,0 126.5,0 C56.6359792,0 0,56.6359792 0,126.5 C0,196.364021 56.6359792,253 126.5,253 Z M82.678324,213.191925 C76.9189197,216.471979 72.25,213.761465 72.25,207.13597 L72.25,45.8640298 C72.25,39.2393642 76.9235422,36.5273677 82.678324,39.8007434 L224.571676,120.511057 C230.33108,123.787062 230.326458,129.10443 224.571676,132.381852 L82.678324,213.191925 Z" id="Oval-8" fill="#FFFFFF" sketch:type="MSShapeGroup"></path>' +
         '</g>' +
         '</svg>' +
@@ -1668,6 +1696,7 @@
 
       file.processed = false;
       file.isDuplicate = false;
+      file.retryAttemptsRemaining = this.options.retryAttempts;
 
       if (this.options.allowDuplicates === false && this.files.length) {
         for (var _i = 0, _len = this.files.length; _i < _len; _i++) {
@@ -1836,9 +1865,9 @@
         params = urlParams(params);
 
         xhr.onload = function() {
-          if (xhr.readyState !== 4) {
-            return;
-          }
+          // if (xhr.readyState !== 4) {
+          //   return;
+          // }
           if (xhr.status / 100 !== 2) {
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
           }
@@ -1889,6 +1918,15 @@
         parallelMax = this.options.parallelUploads,
         workerCount = this.getWorkerCount();
 
+      // Attempt to finish uploads first.
+      while ((file = activeFiles.shift())) {
+        if (file.upload.chunksSuccessful()) {
+          this._finishUpload(file);
+          workerCount++;
+        }
+      }
+      // Attempt to upload chunks.
+      activeFiles = this.getActiveFiles();
       if (!(file = activeFiles.shift())) {
         // Nothing to process - no QUEUED or UPLOADING status files.
         return;
@@ -1899,13 +1937,6 @@
           workerCount++;
         } else if (this.getUploadingFiles().length >= parallelMax || !(file = activeFiles.shift())) {
           break;
-        }
-      }
-      // Attempt to finish uploads
-      activeFiles = this.getActiveFiles();
-      while ((file = activeFiles.shift())) {
-        if (file.upload.chunksSuccessful()) {
-          this._finishUpload(file);
         }
       }
     };
@@ -1934,6 +1965,7 @@
           if (e.target.status / 100 != 2) {
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target)
           }
+          file.retryAttemptsRemaining = _this.options.retryAttempts;
           file.upload.setChunkComplete(chunkNum);
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
           setTimeout(function() {
@@ -1941,7 +1973,7 @@
           }, 0);
 
         };
-      })(this, file, chunkNum);
+    })(this, file, chunkNum);
 
       var error_callback = (function(_this, file, chunkNum) {
         return function(e) {
@@ -2071,7 +2103,15 @@
       } else if (xhr.status === 0 && this.options.fileResumable && isInResumableState) {
         // Connection error: pause download.
         file.status = Dropzone.PAUSED;
-        this.emit("pausing", file);
+        if (file.retryAttemptsRemaining > 0) {
+          this.emit("pausing", file, _this.options.dictConnectionError.replace("{{seconds}}", this.options.retryInterval));
+          file.retryAttemptsRemaining -= 1;
+          return setTimeout(function() {
+            _this.resumeFile(file);
+          }, _this.options.retryInterval * 1000);
+        } else {
+          this.emit("pausing", file, _this.options.dictResumeUpload);
+        }
       } else {
         file.status = Dropzone.ERROR;
         this.emit("error", file, message, xhr);
