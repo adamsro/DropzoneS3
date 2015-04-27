@@ -296,7 +296,7 @@
       payload: "",
       load_callback: load_callback,
       error_callback: error_callback,
-      timeout: 15000, // 15sec
+      timeout: 20000, // 20sec
       timeout_callback: error_callback,
     }).send();
   };
@@ -363,7 +363,7 @@
           callback(parts);
         }
       },
-      timeout: 15000, // 15sec
+      timeout: 20000, // 20sec
       timeout_callback: error_callback,
     }).send();
   };
@@ -416,7 +416,7 @@
       payload: data,
       load_callback: load_callback,
       error_callback: error_callback,
-      timeout: 15000, // 15sec
+      timeout: 20000, // 20sec
       timeout_callback: error_callback,
     }).send();
   };
@@ -433,7 +433,7 @@
         return (e.target.status / 100 == 2) ? callback(true) : callback(false);
       },
       error_callback: error_callback,
-      timeout: 15000, // 15sec
+      timeout: 20000, // 20sec
       timeout_callback: error_callback,
     }).send();
   };
@@ -452,7 +452,7 @@
         return (e.target.status / 100 == 2) ? callback() : error_callback(e);
       },
       error_callback: error_callback,
-      timeout: 15000, // 15sec
+      timeout: 20000, // 20sec
       timeout_callback: error_callback,
     }).send();
   };
@@ -823,8 +823,8 @@
       fileResumable: true,
       previewsContainer: null,
       capture: null,
-      retryAttempts: 2,
-      retryInterval: 10, // 10 seconds
+      retryAttempts: 3,
+      retryInterval: 10, // seconds
       dictDefaultMessage: "Drop files here to upload",
       dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
       dictFallbackText: "Please use the fallback form below to upload your files like in the olden days.",
@@ -1064,7 +1064,9 @@
         file.previewElement.classList.add("dz-paused");
         file.previewElement.addEventListener("click", resumeFileEvent);
 
-        if (!message) { message = ''; }
+        if (!message) {
+          message = '';
+        }
         if (typeof message !== "String" && message.error) {
           message = message.error;
         }
@@ -1913,7 +1915,7 @@
     };
 
     Dropzone.prototype.processQueue = function() {
-      var file, chunkNum,
+        var file, chunkNum,
         activeFiles = this.getActiveFiles(),
         parallelMax = this.options.parallelUploads,
         workerCount = this.getWorkerCount();
@@ -1973,7 +1975,7 @@
           }, 0);
 
         };
-    })(this, file, chunkNum);
+      })(this, file, chunkNum);
 
       var error_callback = (function(_this, file, chunkNum) {
         return function(e) {
@@ -2016,6 +2018,7 @@
     };
 
     Dropzone.prototype.cancelUpload = function(file) {
+      var _this = this;
       // Abort all sending requests and send an abort request to Amazon to deallocate space
       file.upload.abort(noop, (function(_this, file) {
         return function(e) {
@@ -2025,7 +2028,9 @@
       file.status = Dropzone.CANCELED;
       this.emit("canceled", file);
 
-      return this.processQueue();
+      return setTimeout(function() {
+        return _this.processQueue();
+      }, 0);
     };
 
     Dropzone.prototype.removeFile = function(file) {
@@ -2071,7 +2076,9 @@
       var parts_incomplete_callback = (function(_this, file) {
         return function() {
           file.status = Dropzone.UPLOADING;
-          return _this.processQueue();
+          return setTimeout(function() {
+            return _this.processQueue();
+          }, 0);
         };
       })(this, file);
 
