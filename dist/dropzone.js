@@ -881,12 +881,12 @@
         srcRatio = file.width / file.height;
         info.optWidth = this.options.thumbnailWidth;
         info.optHeight = this.options.thumbnailHeight;
-        if ((info.optWidth === null) && (info.optHeight === null)) {
+        if ((info.optWidth == null) && (info.optHeight == null)) {
           info.optWidth = info.srcWidth;
           info.optHeight = info.srcHeight;
-        } else if (info.optWidth === null) {
+        } else if (info.optWidth == null) {
           info.optWidth = srcRatio * info.optHeight;
-        } else if (info.optHeight === null) {
+        } else if (info.optHeight == null) {
           info.optHeight = (1 / srcRatio) * info.optWidth;
         }
         trgRatio = info.optWidth / info.optHeight;
@@ -1000,7 +1000,7 @@
       removedfile: function(file) {
         var _ref;
         if (file.previewElement) {
-          if ((_ref = file.previewElement) !== null) {
+          if ((_ref = file.previewElement) != null) {
             _ref.parentNode.removeChild(file.previewElement);
           }
         }
@@ -1178,7 +1178,7 @@
       if (typeof this.element === "string") {
         this.element = document.querySelector(this.element);
       }
-      if (!(this.element && (this.element.nodeType !== null))) {
+      if (!(this.element && (this.element.nodeType != null))) {
         throw new Error("Invalid dropzone element.");
       }
       if (this.element.dropzone) {
@@ -1438,7 +1438,7 @@
       var _ref;
       this.disable();
       this.removeAllFiles(true);
-      if ((_ref = this.hiddenFileInput) !== null ? _ref.parentNode : void 0) {
+      if ((_ref = this.hiddenFileInput) != null ? _ref.parentNode : void 0) {
         this.hiddenFileInput.parentNode.removeChild(this.hiddenFileInput);
         this.hiddenFileInput = null;
       }
@@ -1491,7 +1491,7 @@
         this.element.setAttribute("enctype", "multipart/form-data");
         this.element.setAttribute("method", this.options.method);
       }
-      return form !== null ? form : fields;
+      return form != null ? form : fields;
     };
 
     Dropzone.prototype.getExistingFallback = function() {
@@ -1594,7 +1594,7 @@
     };
 
     Dropzone.prototype._updateMaxFilesReachedClass = function() {
-      if ((this.options.maxFiles !== null) && this.getAcceptedFiles().length >= this.options.maxFiles) {
+      if ((this.options.maxFiles != null) && this.getAcceptedFiles().length >= this.options.maxFiles) {
         if (this.getAcceptedFiles().length === this.options.maxFiles) {
           this.emit('maxfilesreached', this.files);
         }
@@ -1613,7 +1613,7 @@
       files = e.dataTransfer.files;
       if (files.length) {
         items = e.dataTransfer.items;
-        if (items && items.length && (items[0].webkitGetAsEntry !== null)) {
+        if (items && items.length && (items[0].webkitGetAsEntry != null)) {
           this._addFilesFromItems(items);
         } else {
           this.handleFiles(files);
@@ -1623,7 +1623,7 @@
 
     Dropzone.prototype.paste = function(e) {
       var items, _ref;
-      if ((e !== null ? (_ref = e.clipboardData) !== null ? _ref.items : void 0 : void 0) === null) {
+      if ((e != null ? (_ref = e.clipboardData) != null ? _ref.items : void 0 : void 0) == null) {
         return;
       }
       this.emit("paste", e);
@@ -1648,7 +1648,7 @@
       _results = [];
       for (_i = 0, _len = items.length; _i < _len; _i++) {
         item = items[_i];
-        if ((item.webkitGetAsEntry !== null) && (entry = item.webkitGetAsEntry())) {
+        if ((item.webkitGetAsEntry != null) && (entry = item.webkitGetAsEntry())) {
           if (entry.isFile) {
             _results.push(this.addFile(item.getAsFile()));
           } else if (entry.isDirectory) {
@@ -1656,7 +1656,7 @@
           } else {
             _results.push(void 0);
           }
-        } else if (item.getAsFile !== null) {
+        } else if (item.getAsFile != null) {
           if ((item.kind === null) || item.kind === "file") {
             _results.push(this.addFile(item.getAsFile()));
           } else {
@@ -1780,12 +1780,12 @@
 
     Dropzone.prototype.createThumbnail = function(file, callback) {
       var fileReader;
-      fileReader = new FileReader();
+      fileReader = new FileReader;
       fileReader.onload = (function(_this) {
         return function() {
           if (file.type === "image/svg+xml") {
             _this.emit("thumbnail", file, fileReader.result);
-            if (callback !== null) {
+            if (callback != null) {
               callback();
             }
             return;
@@ -1805,28 +1805,28 @@
           file.width = img.width;
           file.height = img.height;
           resizeInfo = _this.options.resize.call(_this, file);
-          if (resizeInfo.trgWidth === null) {
+          if (resizeInfo.trgWidth == null) {
             resizeInfo.trgWidth = resizeInfo.optWidth;
           }
-          if (resizeInfo.trgHeight === null) {
+          if (resizeInfo.trgHeight == null) {
             resizeInfo.trgHeight = resizeInfo.optHeight;
           }
           canvas = document.createElement("canvas");
           ctx = canvas.getContext("2d");
           canvas.width = resizeInfo.trgWidth;
           canvas.height = resizeInfo.trgHeight;
-          drawImageIOSFix(ctx, img, (_ref = resizeInfo.srcX) !== null ? _ref : 0, (_ref1 = resizeInfo.srcY) !== null ? _ref1 : 0, resizeInfo.srcWidth, resizeInfo.srcHeight, (_ref2 = resizeInfo.trgX) !== null ? _ref2 : 0, (_ref3 = resizeInfo.trgY) !== null ? _ref3 : 0, resizeInfo.trgWidth, resizeInfo.trgHeight);
+          drawImageIOSFix(ctx, img, (_ref = resizeInfo.srcX) != null ? _ref : 0, (_ref1 = resizeInfo.srcY) != null ? _ref1 : 0, resizeInfo.srcWidth, resizeInfo.srcHeight, (_ref2 = resizeInfo.trgX) != null ? _ref2 : 0, (_ref3 = resizeInfo.trgY) != null ? _ref3 : 0, resizeInfo.trgWidth, resizeInfo.trgHeight);
           thumbnail = canvas.toDataURL("image/png");
           _this.emit("thumbnail", file, thumbnail);
-          if (callback !== null) {
+          if (callback != null) {
             return callback();
           }
         };
       })(this);
-      if (callback !== null) {
+      if (callback != null) {
         img.onerror = callback;
       }
-      return img.src == imageUrl;
+      return (img.src = imageUrl);
     };
 
     Dropzone.prototype.accept = function(file, done) {
@@ -1835,7 +1835,7 @@
         return done(this.options.dictFileTooBig.replace("{{filesize}}", Math.round(file.size / 1024 / 10.24) / 100).replace("{{maxFilesize}}", this.options.maxFilesize));
       } else if (!Dropzone.isValidFile(file, this.options.acceptedFiles)) {
         return done(this.options.dictInvalidFileType);
-      } else if ((this.options.maxFiles !== null) && this.getAcceptedFiles().length >= this.options.maxFiles) {
+      } else if ((this.options.maxFiles != null) && this.getAcceptedFiles().length >= this.options.maxFiles) {
         done(this.options.dictMaxFilesExceeded.replace("{{maxFiles}}", this.options.maxFiles));
         return this.emit("maxfilesexceeded", file);
       } else {
@@ -2060,7 +2060,7 @@
 
     Dropzone.prototype.removeAllFiles = function(cancelIfNecessary) {
       var file, _i, _len, _ref;
-      if (cancelIfNecessary === null) {
+      if (cancelIfNecessary == null) {
         cancelIfNecessary = false;
       }
       _ref = this.files.slice();
@@ -2120,7 +2120,7 @@
 
       if (xhr.status === 0 && file.status == Dropzone.PAUSED) {
         return;
-      } else if (xhr.status === 0 && this.options.fileResumable && isInResumableState) {
+      } else if ((xhr.status === 0 || (xhr.status == 404 && xhr.responseText.indexOf("RequestTimeout") !== -1)) && this.options.fileResumable && isInResumableState) {
         // Connection error: pause download.
         file.status = Dropzone.PAUSED;
         if (file.retryAttemptsRemaining > 0) {
@@ -2164,7 +2164,7 @@
     if (typeof element === "string") {
       element = document.querySelector(element);
     }
-    if ((element !== null ? element.dropzone : void 0) === null) {
+    if ((element != null ? element.dropzone : void 0) == null) {
       throw new Error("No Dropzone found for given element. This is probably because you're trying to access it before Dropzone had the time to initialize. Use the `init` option to setup any additional observers on your Dropzone.");
     }
     return element.dropzone;
@@ -2271,10 +2271,10 @@
     var element;
     if (typeof el === "string") {
       element = document.querySelector(el);
-    } else if (el.nodeType !== null) {
+    } else if (el.nodeType != null) {
       element = el;
     }
-    if (element === null) {
+    if (element == null) {
       throw new Error("Invalid `" + name + "` option provided. Please provide a CSS selector or a plain HTML element.");
     }
     return element;
@@ -2300,10 +2300,10 @@
         el = _ref[_j];
         elements.push(el);
       }
-    } else if (els.nodeType !== null) {
+    } else if (els.nodeType != null) {
       elements = [els];
     }
-    if (!((elements !== null) && elements.length)) {
+    if (!((elements != null) && elements.length)) {
       throw new Error("Invalid `" + name + "` option provided. Please provide a CSS selector, a plain HTML element or a list of those.");
     }
     return elements;
@@ -2312,7 +2312,7 @@
   Dropzone.confirm = function(question, accepted, rejected) {
     if (window.confirm(question)) {
       return accepted();
-    } else if (rejected !== null) {
+    } else if (rejected != null) {
       return rejected();
     }
   };
