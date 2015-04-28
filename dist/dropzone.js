@@ -512,7 +512,7 @@
           var xml = e.target.responseXML;
           _this.auth.uploadId = xml.getElementsByTagName('UploadId')[0].textContent;
           _this.chunks = initChunkArray(_this.file.size, _this.chunkSize);
-          callback(false, _this.auth.uploadId);
+          callback(false);
         }, error_callback);
       } else {
         // UploadId was saved in backend. Get the uploaded parts from S3
@@ -520,7 +520,7 @@
           // Got part list from Amazon
           _this.chunks = updateChunks(parts, _this.file.size, _this.chunkSize);
           // Process the queue
-          callback(false, _this.auth.uploadId);
+          callback(false);
         }, function(e) {
           if (e.target.status === 404 && e.target.responseText.indexOf("NoSuchUpload") !== -1) {
             // The specified multipart upload does not exist. The upload ID
@@ -784,6 +784,8 @@
       "thumbnail",
       "error",
       "processing",
+      "filesigned",
+      "fileinit",
       "enqueuing",
       "uploadprogress",
       "totaluploadprogress",
@@ -824,6 +826,8 @@
       autoQueue: true,
       addRemoveLinks: true,
       fileResumable: true,
+      localStorageResume: true,
+      localStoragePrefix: 'ds3', // Unique but consistent per instance to avoid collisions.
       previewsContainer: null,
       capture: null,
       retryAttempts: 3,
@@ -1048,13 +1052,16 @@
         }
       },
       enqueuing: noop,
+      filesigned: function(file, auth, done) {
+        done();
+      },
+      fileinit: function(file, done) {
+        done();
+      },
       pausing: function(file, message) {
         if (!this.options.fileResumable) {
           return false;
         }
-        // file._resumeLink = Dropzone.createElement("<a class=\"dz-resume\" href=\"javascript:undefined;\" data-dz-resume>" + this.options.dictResumeUpload + "</a>");
-        // file.previewElement.appendChild(file._resumeLink);
-
         var resumeFileEvent = (function(_this, file) {
           return function(e) {
             e.preventDefault();
@@ -1079,12 +1086,8 @@
         }
       },
       resuming: function(file) {
-        if (!this.options.fileResumable) {
-          return false;
-        }
         file.previewElement.classList.remove("dz-paused");
       },
-      processingmultiple: noop,
       uploadprogress: function(file, progress, bytesSent) {
         var node, _i, _len, _ref, _results;
         if (file.previewElement) {
@@ -1103,17 +1106,17 @@
       },
       totaluploadprogress: noop,
       sending: noop,
-      sendingmultiple: noop,
       success: function(file) {
         if (file.previewElement) {
           return file.previewElement.classList.add("dz-success");
         }
       },
-      successmultiple: noop,
       canceled: function(file) {
         return this.emit("error", file, "Upload canceled.");
       },
-      canceledmultiple: noop,
+      finish: function(file, e, done) {
+        done(); // finish function completed
+      },
       complete: function(file) {
         if (file._removeLink) {
           file._removeLink.textContent = this.options.dictRemoveFile;
@@ -1122,7 +1125,6 @@
           return file.previewElement.classList.add("dz-complete");
         }
       },
-      completemultiple: noop,
       maxfilesexceeded: noop,
       maxfilesreached: noop,
       queuecomplete: noop,
@@ -1843,17 +1845,9 @@
       }
     };
 
-
-    // var urlParams = function(params) {
-    //   var out = [];
-    //   for (var key in params) {
-    //     out.push(key + '=' + encodeURIComponent(params[key]));
-    //   }
-    //   return out.join('&');
-    // };
-
     Dropzone.prototype.processFile = function(file) {
-      var _this = this, params;
+      var _this = this,
+        params;
 
       if (file.status === Dropzone.ADDED && file.accepted === true) {
         // Get s3 signature from the backend.
@@ -1867,31 +1861,36 @@
           var json = JSON.parse(xhr.responseText);
 
           // See if file has an uploadID from a previous upload attempt and try to resume.
-          if(_this.options.allowDuplicates === false) {
+          if (_this.options.localStorageResume === true && _this.options.allowDuplicates === false) {
             var item;
-            if ((item = window.localStorage.getItem("DS3" + JSON.stringify({"n": file.name, "s": file.size, "l": file.lastModified})))) {
+            if ((item = window.localStorage.getItem(_this.options.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified })))) {
               item = JSON.parse(item);
               json.uploadId = item.u;
               json.key = item.k;
             }
           }
-          // Initiate multipart upload with Amazon.
-          file.upload.init(json, json.key, function(status, uploadId) {
-            file.processed = true;
-            if (status) {
-              _this._finished(file);
-            } else {
-              // Save uploadId in case resume is needed.
-              if(_this.options.allowDuplicates === false){
-                window.localStorage.setItem("DS3" + JSON.stringify({"n": file.name, "s": file.size, "l": file.lastModified}), JSON.stringify({"u": uploadId, "k": json.key}));
+
+          _this.emit("filesigned", file, json, function() {
+            // Initiate multipart upload with Amazon.
+            file.upload.init(json, json.key, function(status) {
+              file.processed = true;
+              if (status) {
+                _this._finished(file);
+              } else {
+                // Save uploadId in case resume is needed.
+                if (_this.options.localStorageResume === true && _this.options.allowDuplicates === false) {
+                  window.localStorage.setItem(_this.options.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified }), JSON.stringify({ "u": file.upload.auth.uploadId, "k": file.upload.auth.key }));
+                }
+                _this.emit("fileinit", file, function() {
+                  file.status = Dropzone.PROCESSED;
+                  if (_this.options.autoQueue) {
+                    _this.enqueueFile(file);
+                  }
+                });
               }
-              file.status = Dropzone.PROCESSED;
-              if (_this.options.autoQueue) {
-                _this.enqueueFile(file);
-              }
-            }
-          }, function(e) {
-            return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+            }, function(e) {
+              return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+            });
           });
         };
 
@@ -1958,7 +1957,7 @@
       var _len1, _j, callbacks = {};
 
       file.status = Dropzone.UPLOADING;
-      this.emit("processing", file);
+      this.emit("sending", file);
 
       var progress_callback = (function(_this, file, chunkNum) {
         return function(e) {
@@ -2045,12 +2044,12 @@
     };
 
     Dropzone.prototype.removeFile = function(file) {
+      window.localStorage.removeItem(_this.options.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
       if (file.processed === true) {
         this.cancelUpload(file);
       } else {
         file.upload.reset();
       }
-      window.localStorage.removeItem('DS3' + JSON.stringify({'n': file.name, 's': file.size, 'l': file.lastModified}));
       this.files = without(this.files, file);
       this.emit("removedfile", file);
       if (this.files.length === 0) {
@@ -2081,8 +2080,10 @@
 
       var success_callback = (function(_this, file) {
         return function(e) {
-          window.localStorage.removeItem('DS3' + JSON.stringify({'n': file.name, 's': file.size, 'l': file.lastModified}));
-          return _this._finished(file, e.target.responseText, e);
+          window.localStorage.removeItem(_this.options.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
+          _this.options.finish(file, e, function() {
+            return _this._finished(file, e.target.responseText, e);
+          });
         };
       })(this, file);
 
@@ -2134,6 +2135,7 @@
         }
       } else {
         file.status = Dropzone.ERROR;
+        window.localStorage.removeItem(_this.options.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
         this.emit("error", file, message, xhr);
         this.emit("complete", file);
       }
