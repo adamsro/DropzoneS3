@@ -802,10 +802,11 @@
     ];
 
     Dropzone.prototype.defaultOptions = {
-      url: null,
-      method: "post", // TODO remove
-      withCredentials: false,
+      signingUrl: '/?action=sign&',
       parallelUploads: 6,
+      maxFiles: null,
+      maxConcurrentWorkers: 6,
+      maxChunkSize: 1024 * 1024 * 5, // 5 MB
       allowDuplicates: false,
       maxFilesize: 1000 * 10, // 10 GB
       paramName: "file",
@@ -814,10 +815,6 @@
       thumbnailWidth: 120,
       thumbnailHeight: 120,
       filesizeBase: 1000,
-      maxFiles: null,
-      maxConcurrentWorkers: 6,
-      maxChunkSize: 1024 * 1024 * 5, // 5 MB
-      params: {},
       clickable: true,
       ignoreHiddenFiles: true,
       acceptedFiles: null,
@@ -832,6 +829,7 @@
       capture: null,
       retryAttempts: 3,
       retryInterval: 10, // seconds
+      fallbackMethod: "post",
       dictDefaultMessage: "Drop files here to upload",
       dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
       dictFallbackText: "Please use the fallback form below to upload your files like in the olden days.",
@@ -1193,12 +1191,6 @@
       if (this.options.forceFallback || !Dropzone.isBrowserSupported()) {
         return this.options.fallback.call(this);
       }
-      if (this.options.url === null) {
-        this.options.url = this.element.getAttribute("action");
-      }
-      if (!this.options.url) {
-        throw new Error("No URL provided.");
-      }
       if (this.options.acceptedFiles && this.options.acceptedMimeTypes) {
         throw new Error("You can't provide both 'acceptedFiles' and 'acceptedMimeTypes'. 'acceptedMimeTypes' is deprecated.");
       }
@@ -1475,6 +1467,7 @@
       }
     };
 
+    // Not functioning correctly yet
     Dropzone.prototype.getFallbackForm = function() {
       var existingFallback, fields, fieldsString, form;
       if ((existingFallback = this.getExistingFallback())) {
@@ -1487,7 +1480,7 @@
       fieldsString += "<input type=\"file\" name=\"" + (this._getParamName(0)) + "\" " + (this.options.uploadMultiple ? 'multiple="multiple"' : void 0) + " /><input type=\"submit\" value=\"Upload!\"></div>";
       fields = Dropzone.createElement(fieldsString);
       if (this.element.tagName !== "FORM") {
-        form = Dropzone.createElement("<form action=\"" + this.options.url + "\" enctype=\"multipart/form-data\" method=\"" + this.options.method + "\"></form>");
+        form = Dropzone.createElement("<form action=\"" + 'AWS_URL_HERE' + "\" enctype=\"multipart/form-data\" method=\"" + this.options.fallbackMethod + "\"></form>");
         form.appendChild(fields);
       } else {
         this.element.setAttribute("enctype", "multipart/form-data");
@@ -1904,7 +1897,7 @@
         this.emit("processing", file, xhr, params);
 
         xhr.timeout = 20000; // 20 seconds
-        xhr.open("GET", "/?action=sign&" + params, true);
+        xhr.open("GET", this.options.signingUrl + params, true);
         xhr.send();
       } else {
         throw new Error("This file can't be processed because it has already been processed or was rejected.");
