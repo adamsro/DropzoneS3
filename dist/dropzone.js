@@ -1198,7 +1198,7 @@
         this.options.acceptedFiles = this.options.acceptedMimeTypes;
         delete this.options.acceptedMimeTypes;
       }
-      this.options.method = this.options.method.toUpperCase();
+      this.options.fallbackMethod = this.options.fallbackMethod.toUpperCase();
       if ((fallback = this.getExistingFallback()) && fallback.parentNode) {
         fallback.parentNode.removeChild(fallback);
       }
