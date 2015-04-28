@@ -57,7 +57,7 @@
     return target;
   };
 
-  AmazonXHR = (function() {
+  AmazonXHR = (function(CryptoJS) {
 
     var uriencode = function(string) {
       var output = encodeURIComponent(string);
@@ -278,7 +278,7 @@
 
     return AmazonXHR;
 
-  })();
+  })(CryptoJS);
 
   AmazonXHR.init = function(auth, file, key, load_callback, error_callback) {
     return new AmazonXHR({
@@ -497,27 +497,30 @@
       return chunks;
     };
 
-    S3File.prototype.init = function(auth, key, force, callback, error_callback) {
+    S3File.prototype.init = function(auth, key, callback, error_callback) {
       var _this = this;
       this.auth = auth;
       this.auth.date = new Date(auth.date);
       this.key = key;
 
-      if (!this.auth.uploadId || force) {
+      if (!this.auth.uploadId) {
         // New file. Initiate a multipart upload with Amazon
         AmazonXHR.init(this.auth, this.file, this.key, function(e) {
+          if (e.target.status / 100 !== 2) {
+            return error_callback(e);
+          }
           var xml = e.target.responseXML;
           _this.auth.uploadId = xml.getElementsByTagName('UploadId')[0].textContent;
           _this.chunks = initChunkArray(_this.file.size, _this.chunkSize);
-          callback(false);
+          callback(false, _this.auth.uploadId);
         }, error_callback);
       } else {
         // UploadId was saved in backend. Get the uploaded parts from S3
         AmazonXHR.list(this.auth, this.file, this.key, this.auth.uploadId, this.chunkSize, function(parts) {
           // Got part list from Amazon
-          _this.chunks = updateChunks(_this.chunks, parts, _this.file.size, _this.chunkSize);
+          _this.chunks = updateChunks(parts, _this.file.size, _this.chunkSize);
           // Process the queue
-          callback(false);
+          callback(false, _this.auth.uploadId);
         }, function(e) {
           if (e.target.status === 404 && e.target.responseText.indexOf("NoSuchUpload") !== -1) {
             // The specified multipart upload does not exist. The upload ID
@@ -654,7 +657,7 @@
       AmazonXHR.list(this.auth, this.file, this.key, this.auth.uploadId, this.chunkSize, function(parts) {
         if (parts.length != _this.chunks.length) {
           // Amazon does not have all the parts
-          _this.chunks = updateChunks(_this.chunks, parts, _this.file.size, _this.chunkSize);
+          _this.chunks = updateChunks(parts, _this.file.size, _this.chunkSize);
           parts_incomplete_callback();
         } else {
           AmazonXHR.finish(_this.auth, _this.file, _this.key, _this.auth.uploadId, parts, _this.chunkSize, function(e) {
@@ -1841,40 +1844,47 @@
     };
 
 
-    var urlParams = function(params) {
-      var out = [];
-      for (var key in params) {
-        out.push(key + '=' + encodeURIComponent(params[key]));
-      }
-      return out.join('&');
-    };
+    // var urlParams = function(params) {
+    //   var out = [];
+    //   for (var key in params) {
+    //     out.push(key + '=' + encodeURIComponent(params[key]));
+    //   }
+    //   return out.join('&');
+    // };
 
     Dropzone.prototype.processFile = function(file) {
-      var _this = this;
+      var _this = this, params;
 
       if (file.status === Dropzone.ADDED && file.accepted === true) {
         // Get s3 signature from the backend.
         var xhr = new XMLHttpRequest();
 
-        var params = urlParams({
-          "filename": file.name,
-          "filesize": file.size,
-          "last_modified": file.lastModifiedDate,
-          // Start a fresh download every time. Cannot use server resume with duplicates.
-          "force": (this.options.allowDuplicates === true) ? true : false,
-        });
-
         xhr.onload = function() {
           if (xhr.status / 100 !== 2) {
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
           }
+          // Got signature from server.
           var json = JSON.parse(xhr.responseText);
+
+          // See if file has an uploadID from a previous upload attempt and try to resume.
+          if(_this.options.allowDuplicates === false) {
+            var item;
+            if ((item = window.localStorage.getItem("DS3" + JSON.stringify({"n": file.name, "s": file.size, "l": file.lastModified})))) {
+              item = JSON.parse(item);
+              json.uploadId = item.u;
+              json.key = item.k;
+            }
+          }
           // Initiate multipart upload with Amazon.
-          file.upload.init(json, json.key, params.force, function(status) {
+          file.upload.init(json, json.key, function(status, uploadId) {
             file.processed = true;
             if (status) {
               _this._finished(file);
             } else {
+              // Save uploadId in case resume is needed.
+              if(_this.options.allowDuplicates === false){
+                window.localStorage.setItem("DS3" + JSON.stringify({"n": file.name, "s": file.size, "l": file.lastModified}), JSON.stringify({"u": uploadId, "k": json.key}));
+              }
               file.status = Dropzone.PROCESSED;
               if (_this.options.autoQueue) {
                 _this.enqueueFile(file);
@@ -1890,6 +1900,8 @@
         };
 
         file.status = Dropzone.PROCESSING;
+        params = 'filename=' + encodeURIComponent(file.name);
+
         this.emit("processing", file, xhr, params);
 
         xhr.timeout = 20000; // 20 seconds
@@ -2038,6 +2050,7 @@
       } else {
         file.upload.reset();
       }
+      window.localStorage.removeItem('DS3' + JSON.stringify({'n': file.name, 's': file.size, 'l': file.lastModified}));
       this.files = without(this.files, file);
       this.emit("removedfile", file);
       if (this.files.length === 0) {
@@ -2068,6 +2081,7 @@
 
       var success_callback = (function(_this, file) {
         return function(e) {
+          window.localStorage.removeItem('DS3' + JSON.stringify({'n': file.name, 's': file.size, 'l': file.lastModified}));
           return _this._finished(file, e.target.responseText, e);
         };
       })(this, file);
@@ -2197,7 +2211,7 @@
   Dropzone.isBrowserSupported = function() {
     var capableBrowser, regex, _i, _len, _ref;
     capableBrowser = true;
-    if (window.File && window.FileReader && window.FileList && window.Blob && window.FormData && document.querySelector) {
+    if (window.File && window.FileReader && window.FileList && window.Blob && window.FormData && document.querySelector && window.localStorage) {
       if (!("classList" in document.createElement("a"))) {
         capableBrowser = false;
       } else {
