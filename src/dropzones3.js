@@ -25,7 +25,7 @@
  */
 
 (function() {
-  var AmazonXHR, S3File, DropzoneS3, Emitter, camelize, contentLoaded, detectVerticalSquash, drawImageIOSFix, noop, without, extend,
+  var AmazonXHR, S3File, Emitter, DropzoneS3, camelize, contentLoaded, detectVerticalSquash, drawImageIOSFix, noop, without, extend,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) {
@@ -50,8 +50,12 @@
     for (_i = 0, _len = objects.length; _i < _len; _i++) {
       object = objects[_i];
       for (key in object) {
-        val = object[key];
-        target[key] = val;
+        if (object[key] && object[key].constructor && object[key].constructor === Object) {
+          target[key] = target[key] || {};
+          arguments.callee(target[key], object[key]);
+        } else {
+          target[key] = object[key];
+        }
       }
     }
     return target;
@@ -317,12 +321,8 @@
       payload: "",
       error_callback: error_callback,
       load_callback: function(e) {
-        if (e.target.status === 404) {
-          // i.e. the file was already uploaded;
-          if (error_callback) {
-            error_callback(e);
-          }
-          return;
+        if (e.target.status / 100 != 2) {
+          return error_callback(e);
         }
 
         // process the parts, and return an array of
@@ -802,6 +802,12 @@
     ];
 
     DropzoneS3.prototype.defaultOptions = {
+      s3: {
+        region: "us-east-1",
+        bucket: null,
+        accesskey: null,
+        acl: "private"
+      },
       signingEndpoint: '/?action=sign&',
       maxConcurrentWorkers: 6,
       maxFiles: null,
@@ -827,7 +833,6 @@
       capture: null,
       retryAttempts: 3,
       retryInterval: 10, // seconds
-      fallbackMethod: "post",
       dictDefaultMessage: "Drop files here to upload",
       dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
       dictFallbackText: "Please use the fallback form below to upload your files like in the olden days.",
@@ -1186,6 +1191,9 @@
       this.element.dropzone = this;
       elementOptions = (_ref = DropzoneS3.optionsForElement(this.element)) !== null ? _ref : {};
       this.options = extend({}, this.defaultOptions, elementOptions, options !== null ? options : {});
+      if (!this.options.s3.bucket || !this.options.s3.accesskey) {
+        throw new Error("Amazon S3 bucket and access key must be set.");
+      }
       if (this.options.forceFallback || !DropzoneS3.isBrowserSupported()) {
         return this.options.fallback.call(this);
       }
@@ -1196,7 +1204,6 @@
         this.options.acceptedFiles = this.options.acceptedMimeTypes;
         delete this.options.acceptedMimeTypes;
       }
-      this.options.fallbackMethod = this.options.fallbackMethod.toUpperCase();
       if ((fallback = this.getExistingFallback()) && fallback.parentNode) {
         fallback.parentNode.removeChild(fallback);
       }
@@ -1215,7 +1222,7 @@
         }
       }
       this.init();
-    }
+    };
 
     DropzoneS3.prototype.getAcceptedFiles = function() {
       var file, _i, _len, _ref, _results;
@@ -1478,7 +1485,7 @@
       fieldsString += "<input type=\"file\" name=\"" + (this._getParamName(0)) + "\" " + (this.options.uploadMultiple ? 'multiple="multiple"' : void 0) + " /><input type=\"submit\" value=\"Upload!\"></div>";
       fields = DropzoneS3.createElement(fieldsString);
       if (this.element.tagName !== "FORM") {
-        form = DropzoneS3.createElement("<form action=\"" + 'AWS_URL_HERE' + "\" enctype=\"multipart/form-data\" method=\"" + this.options.fallbackMethod + "\"></form>");
+        form = DropzoneS3.createElement("<form action=\"" + 'AWS_URL_HERE' + "\" enctype=\"multipart/form-data\" method=\"POST\"></form>");
         form.appendChild(fields);
       } else {
         this.element.setAttribute("enctype", "multipart/form-data");
@@ -1885,22 +1892,27 @@
           if (xhr.status / 100 !== 2) {
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
           }
-          // Got signature from server.
-          var json = JSON.parse(xhr.responseText);
+          // Got signature, signature date, and key from server.
+          var auth = JSON.parse(xhr.responseText);
 
           // See if file has an uploadID from a previous upload attempt and try to resume.
           if (_this.options.localStorageResume === true && _this.options.allowDuplicates === false) {
             var item;
             if ((item = window.localStorage.getItem(_this.options.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified })))) {
               item = JSON.parse(item);
-              json.uploadId = item.u;
-              json.key = item.k;
+              auth.uploadId = item.u;
+              auth.key = item.k;
             }
           }
 
-          _this.emit("filesigned", file, json, function() {
+          auth.region = _this.options.s3.region;
+          auth.bucket = _this.options.s3.bucket;
+          auth.access_key = _this.options.s3.accesskey;
+          auth.acl = _this.options.s3.acl;
+
+          _this.emit("filesigned", file, auth, function() {
             // Initiate multipart upload with Amazon.
-            file.upload.init(json, json.key, function(status) {
+            file.upload.init(auth, auth.key, function(status) {
               file.processed = true;
               if (status) {
                 _this._finished(file);
@@ -2151,42 +2163,6 @@
     return element.dropzone;
   };
 
-  DropzoneS3.autoDiscover = true;
-
-  DropzoneS3.discover = function() {
-    var checkElements, dropzone, dropzones, _i, _len, _results;
-    if (document.querySelectorAll) {
-      dropzones = document.querySelectorAll(".dropzoneS3");
-    } else {
-      dropzones = [];
-      checkElements = function(elements) {
-        var el, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = elements.length; _i < _len; _i++) {
-          el = elements[_i];
-          if (/(^| )dropzoneS3($| )/.test(el.className)) {
-            _results.push(dropzones.push(el));
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      };
-      checkElements(document.getElementsByTagName("div"));
-      checkElements(document.getElementsByTagName("form"));
-    }
-    _results = [];
-    for (_i = 0, _len = dropzones.length; _i < _len; _i++) {
-      dropzone = dropzones[_i];
-      if (DropzoneS3.optionsForElement(dropzone) !== false) {
-        _results.push(new DropzoneS3(dropzone));
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
   DropzoneS3.blacklistedBrowsers = [/opera.*Macintosh.*version\/12/i];
 
   DropzoneS3.isBrowserSupported = function() {
@@ -2401,72 +2377,5 @@
     vertSquashRatio = detectVerticalSquash(img);
     return ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh / vertSquashRatio);
   };
-
-
-  /*
-   * contentloaded.js
-   *
-   * Author: Diego Perini (diego.perini at gmail.com)
-   * Summary: cross-browser wrapper for DOMContentLoaded
-   * Updated: 20101020
-   * License: MIT
-   * Version: 1.2
-   *
-   * URL:
-   * http://javascript.nwbox.com/ContentLoaded/
-   * http://javascript.nwbox.com/ContentLoaded/MIT-LICENSE
-   */
-
-  contentLoaded = function(win, fn) {
-    var add, doc, done, init, poll, pre, rem, root, top;
-    done = false;
-    top = true;
-    doc = win.document;
-    root = doc.documentElement;
-    add = (doc.addEventListener ? "addEventListener" : "attachEvent");
-    rem = (doc.addEventListener ? "removeEventListener" : "detachEvent");
-    pre = (doc.addEventListener ? "" : "on");
-    init = function(e) {
-      if (e.type === "readystatechange" && doc.readyState !== "complete") {
-        return;
-      }
-      (e.type === "load" ? win : doc)[rem](pre + e.type, init, false);
-      if (!done && (done = true)) {
-        return fn.call(win, e.type || e);
-      }
-    };
-    poll = function() {
-      var e;
-      try {
-        root.doScroll("left");
-      } catch (_error) {
-        e = _error;
-        setTimeout(poll, 50);
-        return;
-      }
-      return init("poll");
-    };
-    if (doc.readyState !== "complete") {
-      if (doc.createEventObject && root.doScroll) {
-        try {
-          top = !win.frameElement;
-        } catch (_error) {}
-        if (top) {
-          poll();
-        }
-      }
-      doc[add](pre + "DOMContentLoaded", init, false);
-      doc[add](pre + "readystatechange", init, false);
-      return win[add](pre + "load", init, false);
-    }
-  };
-
-  DropzoneS3._autoDiscoverFunction = function() {
-    if (DropzoneS3.autoDiscover) {
-      return DropzoneS3.discover();
-    }
-  };
-
-  contentLoaded(window, DropzoneS3._autoDiscoverFunction);
 
 }).call(this);
