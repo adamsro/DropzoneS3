@@ -294,7 +294,7 @@
       },
       headers: {
         "x-amz-acl": auth.acl,
-        "Content-Disposition": "attachment; filename=" + file.name,
+        "Content-Disposition": "attachment; filename=" + escape(file.name),
         "Content-Type": file.type || "application/octet-stream"
       },
       payload: "",
@@ -2166,9 +2166,9 @@
     return element.dropzone;
   };
 
-  Dropzone.autoDiscover = true;
+  DropzoneS3.autoDiscover = true;
 
-  Dropzone.discover = function() {
+  DropzoneS3.discover = function() {
     var checkElements, dropzone, dropzones, _i, _len, _results;
     if (document.querySelectorAll) {
       dropzones = document.querySelectorAll(".dropzone");
@@ -2475,12 +2475,12 @@
     }
   };
 
-  Dropzone._autoDiscoverFunction = function() {
-    if (Dropzone.autoDiscover) {
-      return Dropzone.discover();
+  DropzoneS3._autoDiscoverFunction = function() {
+    if (DropzoneS3.autoDiscover) {
+      return DropzoneS3.discover();
     }
   };
 
-  contentLoaded(window, Dropzone._autoDiscoverFunction);
+  contentLoaded(window, DropzoneS3._autoDiscoverFunction);
 
 }).call(this);
