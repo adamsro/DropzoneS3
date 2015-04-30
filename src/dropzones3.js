@@ -802,10 +802,9 @@
     ];
 
     DropzoneS3.prototype.defaultOptions = {
-      signingUrl: '/?action=sign&',
-      parallelUploads: 6,
-      maxFiles: null,
+      signingEndpoint: '/?action=sign&',
       maxConcurrentWorkers: 6,
+      maxFiles: null,
       maxChunkSize: 1024 * 1024 * 5, // 5 MB
       allowDuplicates: false,
       maxFilesize: 1000 * 10, // 10 GB
@@ -819,7 +818,6 @@
       ignoreHiddenFiles: true,
       acceptedFiles: null,
       acceptedMimeTypes: null,
-      autoProcess: true,
       autoQueue: true,
       addRemoveLinks: true,
       fileResumable: true,
@@ -1734,15 +1732,29 @@
             _this._errorProcessing(file, error);
           } else {
             file.accepted = true;
-            if (_this.options.autoProcess) {
+            if (_this.options.autoQueue) {
               setTimeout(function() {
-                return _this.processFile(file);
+                return _this.enqueueFile(file);
               }, 0);
             }
           }
           return _this._updateMaxFilesReachedClass();
         };
       })(this));
+    };
+
+    DropzoneS3.prototype.accept = function(file, done) {
+      var xhr, params;
+      if (file.size > this.options.maxFilesize * 1024 * 1024) {
+        return done(this.options.dictFileTooBig.replace("{{filesize}}", Math.round(file.size / 1024 / 10.24) / 100).replace("{{maxFilesize}}", this.options.maxFilesize));
+      } else if (!DropzoneS3.isValidFile(file, this.options.acceptedFiles)) {
+        return done(this.options.dictInvalidFileType);
+      } else if ((this.options.maxFiles != null) && this.getAcceptedFiles().length >= this.options.maxFiles) {
+        done(this.options.dictMaxFilesExceeded.replace("{{maxFiles}}", this.options.maxFiles));
+        return this.emit("maxfilesexceeded", file);
+      } else {
+        return this.options.accept.call(this, file, done);
+      }
     };
 
     DropzoneS3.prototype._thumbnailQueue = [];
@@ -1824,25 +1836,48 @@
       return (img.src = imageUrl);
     };
 
-    DropzoneS3.prototype.accept = function(file, done) {
-      var xhr, params;
-      if (file.size > this.options.maxFilesize * 1024 * 1024) {
-        return done(this.options.dictFileTooBig.replace("{{filesize}}", Math.round(file.size / 1024 / 10.24) / 100).replace("{{maxFilesize}}", this.options.maxFilesize));
-      } else if (!DropzoneS3.isValidFile(file, this.options.acceptedFiles)) {
-        return done(this.options.dictInvalidFileType);
-      } else if ((this.options.maxFiles != null) && this.getAcceptedFiles().length >= this.options.maxFiles) {
-        done(this.options.dictMaxFilesExceeded.replace("{{maxFiles}}", this.options.maxFiles));
-        return this.emit("maxfilesexceeded", file);
+    DropzoneS3.prototype.enqueueFile = function(file) {
+      var _this = this;
+      if (file.status === DropzoneS3.ADDED && file.accepted === true) {
+        this.emit("enqueuing", file);
+        file.status = DropzoneS3.QUEUED;
+        return setTimeout(function() {
+          return _this.processQueue();
+        }, 0);
       } else {
-        return this.options.accept.call(this, file, done);
+        throw new Error("This file can't be enqueued because it has not been processed or was rejected.");
       }
     };
 
-    DropzoneS3.prototype.processFile = function(file) {
+    DropzoneS3.prototype.processQueue = function() {
+      var file, chunkNum,
+        activeFiles = this.getActiveFiles(),
+        workerCount = this.getWorkerCount();
+
+      while ((file = activeFiles.shift()) && workerCount < this.options.maxConcurrentWorkers) {
+        if (file.status == DropzoneS3.QUEUED && file.processed === false) {
+          // Initiate the multipart upload
+          this.initUpload(file);
+          workerCount++;
+        } else if (file.upload.chunksSuccessful()) {
+          // Tell amazon to complete the upload
+          this.finishUpload(file);
+          workerCount++;
+        } else {
+          // Start PUT requests uploading chunks
+          while ((chunkNum = file.upload.getNextQueuedChunk()) !== false && workerCount < this.options.maxConcurrentWorkers) {
+            this.uploadChunk(file, chunkNum);
+            workerCount++;
+          }
+        }
+      }
+    };
+
+    DropzoneS3.prototype.initUpload = function(file) {
       var _this = this,
         params;
 
-      if (file.status === DropzoneS3.ADDED && file.accepted === true) {
+      if (file.processed === false && file.accepted === true) {
         // Get s3 signature from the backend.
         var xhr = new XMLHttpRequest();
 
@@ -1875,10 +1910,10 @@
                   window.localStorage.setItem(_this.options.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified }), JSON.stringify({ "u": file.upload.auth.uploadId, "k": file.upload.auth.key }));
                 }
                 _this.emit("fileinit", file, function() {
-                  file.status = DropzoneS3.PROCESSED;
-                  if (_this.options.autoQueue) {
-                    _this.enqueueFile(file);
-                  }
+                  file.status = DropzoneS3.QUEUED;
+                  return setTimeout(function() {
+                    return _this.processQueue();
+                  }, 0);
                 });
               }
             }, function(e) {
@@ -1897,52 +1932,10 @@
         this.emit("processing", file, xhr, params);
 
         xhr.timeout = 20000; // 20 seconds
-        xhr.open("GET", this.options.signingUrl + params, true);
+        xhr.open("GET", this.options.signingEndpoint + params, true);
         xhr.send();
       } else {
         throw new Error("This file can't be processed because it has already been processed or was rejected.");
-      }
-    };
-
-    DropzoneS3.prototype.enqueueFile = function(file) {
-      var _this = this;
-      if (file.status === DropzoneS3.PROCESSED) {
-        this.emit("enqueuing", file);
-        file.status = DropzoneS3.QUEUED;
-        return setTimeout(function() {
-          return _this.processQueue();
-        }, 0);
-      } else {
-        throw new Error("This file can't be enqueued because it has not been processed or was rejected.");
-      }
-    };
-
-    DropzoneS3.prototype.processQueue = function() {
-      var file, chunkNum,
-        activeFiles = this.getActiveFiles(),
-        parallelMax = this.options.parallelUploads,
-        workerCount = this.getWorkerCount();
-
-      // Attempt to finish uploads first.
-      while ((file = activeFiles.shift())) {
-        if (file.upload.chunksSuccessful()) {
-          this._finishUpload(file);
-          workerCount++;
-        }
-      }
-      // Attempt to upload chunks.
-      activeFiles = this.getActiveFiles();
-      if (!(file = activeFiles.shift())) {
-        // Nothing to process - no QUEUED or UPLOADING status files.
-        return;
-      }
-      while (workerCount < this.options.maxConcurrentWorkers) {
-        if ((chunkNum = file.upload.getNextQueuedChunk()) !== false) {
-          this.uploadChunk(file, chunkNum);
-          workerCount++;
-        } else if (this.getUploadingFiles().length >= parallelMax || !(file = activeFiles.shift())) {
-          break;
-        }
       }
     };
 
@@ -2006,17 +1999,10 @@
       var _this = this;
       if (file.status === DropzoneS3.PAUSED) {
         _this.emit("resuming", file);
-        if (file.accepted && !file.processed) {
-          file.status = DropzoneS3.ADDED;
-          return setTimeout(function() {
-            return _this.processFile(file);
-          }, 0);
-        } else {
-          file.status = DropzoneS3.UPLOADING;
-          return setTimeout(function() {
-            return _this.processQueue();
-          }, 0);
-        }
+        file.status = DropzoneS3.QUEUED;
+        return setTimeout(function() {
+          return _this.processQueue();
+        }, 0);
       }
     };
 
@@ -2065,7 +2051,7 @@
       return null;
     };
 
-    DropzoneS3.prototype._finishUpload = function(file) {
+    DropzoneS3.prototype.finishUpload = function(file) {
       var _this = this;
 
       file.status = DropzoneS3.FINISHING;
@@ -2114,7 +2100,7 @@
 
       if (xhr.status === 0 && file.status == DropzoneS3.PAUSED) {
         return;
-      } else if ((xhr.status === 0 || (xhr.status == 404 && xhr.responseText.indexOf("RequestTimeout") !== -1)) && this.options.fileResumable && isInResumableState) {
+      } else if ((xhr.status === 0 || xhr.status == 404) && this.options.fileResumable && isInResumableState) {
         // Connection error: pause download.
         file.status = DropzoneS3.PAUSED;
         if (file.retryAttemptsRemaining > 0) {
@@ -2359,8 +2345,6 @@
   DropzoneS3.QUEUED = "queued";
 
   DropzoneS3.PROCESSING = "processing";
-
-  DropzoneS3.PROCESSED = "processed";
 
   DropzoneS3.UPLOADING = "uploading";
 
