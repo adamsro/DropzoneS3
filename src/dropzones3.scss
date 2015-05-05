@@ -441,9 +441,7 @@
     }
 
     &.dz-duplicate-attempt {
-      -moz-transform: scale(1.2);
-      -webkit-transform: scale(1.2);
-      -o-transform: scale(1.2);
+      @include prefix((transform: scale(1.2)));
     }
 
   }

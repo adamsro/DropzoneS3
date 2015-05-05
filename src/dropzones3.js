@@ -284,8 +284,8 @@
 
   })(CryptoJS);
 
-  AmazonXHR.init = function(auth, file, key, load_callback, error_callback) {
-    return new AmazonXHR({
+  AmazonXHR.init = function(auth, file, key, ssencrypt, load_callback, error_callback) {
+    var request  = {
       auth: auth,
       key: key,
       method: "POST",
@@ -302,7 +302,11 @@
       error_callback: error_callback,
       timeout: 20000, // 20sec
       timeout_callback: error_callback
-    }).send();
+    };
+    if (ssencrypt) {
+      request.headers["x-amz-server-side-encryption"] = "AES256";
+    }
+    return new AmazonXHR(request).send();
   };
 
   AmazonXHR.list = function(auth, file, key, upload_id, chunk_size, callback, error_callback, marker) {
@@ -310,7 +314,7 @@
       "uploadId": upload_id
     };
     if (marker) {
-      querystring['part-number​-marker'] = marker;
+      querystring['part-number-marker'] = marker;
     }
     return new AmazonXHR({
       auth: auth,
@@ -497,7 +501,7 @@
       return chunks;
     };
 
-    S3File.prototype.init = function(auth, key, callback, error_callback) {
+    S3File.prototype.init = function(auth, key, ssencrypt, callback, error_callback) {
       var _this = this;
       this.auth = auth;
       this.auth.date = new Date(auth.date);
@@ -505,7 +509,7 @@
 
       if (!this.auth.uploadId) {
         // New file. Initiate a multipart upload with Amazon
-        AmazonXHR.init(this.auth, this.file, this.key, function(e) {
+        AmazonXHR.init(this.auth, this.file, this.key, ssencrypt, function(e) {
           if (e.target.status / 100 !== 2) {
             return error_callback(e);
           }
@@ -806,7 +810,8 @@
         region: "us-east-1",
         bucket: null,
         accesskey: null,
-        acl: "private"
+        acl: "private",
+        ssencrypt: false // Server side encrypt AES256
       },
       signingEndpoint: '/?action=sign&',
       maxConcurrentWorkers: 6,
@@ -1709,7 +1714,7 @@
       if (this.options.allowDuplicates === false && this.files.length) {
         for (var _i = 0, _len = this.files.length; _i < _len; _i++) {
           var _ref = this.files[_i];
-          if (_ref.name === file.name && _ref.size === file.size && _ref.lastModified === file.lastModified) {
+          if (_ref && _ref.name === file.name && _ref.size === file.size && _ref.lastModified === file.lastModified) {
             // New file being added is probably a duplicate of an existing file.
             file.isDuplicate = true;
             switch (_ref.status) {
@@ -1915,7 +1920,7 @@
 
           _this.emit("filesigned", file, auth, function() {
             // Initiate multipart upload with Amazon.
-            file.upload.init(auth, auth.key, function(status) {
+            file.upload.init(auth, auth.key, _this.options.s3.ssencrypt, function(status) {
               file.processed = true;
               if (status) {
                 _this._finished(file);

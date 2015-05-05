@@ -409,8 +409,10 @@
       .dropzoneS3 .dz-preview .dz-pause-message:after {
         border-bottom: 6px solid #fda53a; }
     .dropzoneS3 .dz-preview.dz-duplicate-attempt {
-      -moz-transform: scale(1.2);
       -webkit-transform: scale(1.2);
-      -o-transform: scale(1.2); }
+      -moz-transform: scale(1.2);
+      -ms-transform: scale(1.2);
+      -o-transform: scale(1.2);
+      transform: scale(1.2); }
 
 /*# sourceMappingURL=dropzones3.css.map */
