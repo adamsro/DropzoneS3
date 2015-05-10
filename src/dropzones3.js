@@ -860,18 +860,18 @@
       forceFallback: false,
       fallback: function() {
         var child, messageElement, span, _i, _len, _ref;
-        this.element.className = "" + this.element.className + " dz-browser-not-supported";
+        this.element.className = "" + this.element.className + " dzs3-browser-not-supported";
         _ref = this.element.getElementsByTagName("div");
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           child = _ref[_i];
-          if (/(^| )dz-message($| )/.test(child.className)) {
+          if (/(^| )dzs3-message($| )/.test(child.className)) {
             messageElement = child;
-            child.className = "dz-message";
+            child.className = "dzs3-message";
             continue;
           }
         }
         if (!messageElement) {
-          messageElement = DropzoneS3.createElement("<div class=\"dz-message\"><span></span></div>");
+          messageElement = DropzoneS3.createElement("<div class=\"dzs3-message\"><span></span></div>");
           this.element.appendChild(messageElement);
         }
         span = messageElement.getElementsByTagName("span")[0];
@@ -926,57 +926,57 @@
       and don't overwrite those options.
        */
       drop: function(e) {
-        return this.element.classList.remove("dz-drag-hover");
+        return this.element.classList.remove("dzs3-drag-hover");
       },
       dragstart: noop,
       dragend: function(e) {
-        return this.element.classList.remove("dz-drag-hover");
+        return this.element.classList.remove("dzs3-drag-hover");
       },
       dragenter: function(e) {
-        return this.element.classList.add("dz-drag-hover");
+        return this.element.classList.add("dzs3-drag-hover");
       },
       dragover: function(e) {
-        return this.element.classList.add("dz-drag-hover");
+        return this.element.classList.add("dzs3-drag-hover");
       },
       dragleave: function(e) {
-        return this.element.classList.remove("dz-drag-hover");
+        return this.element.classList.remove("dzs3-drag-hover");
       },
       paste: noop,
       reset: function() {
-        return this.element.classList.remove("dz-started");
+        return this.element.classList.remove("dzs3-started");
       },
       duplicate: function(existingFile, newFile) {
         if (existingFile.previewElement) {
           var handler = function(e, elapsedTime) {
-            existingFile.previewElement.classList.remove("dz-duplicate-attempt");
+            existingFile.previewElement.classList.remove("dzs3-duplicate-attempt");
             existingFile.previewElement.removeEventListener('transitionend', handler, true);
           };
           existingFile.previewElement.addEventListener('transitionend', handler, true);
-          existingFile.previewElement.classList.add("dz-duplicate-attempt");
+          existingFile.previewElement.classList.add("dzs3-duplicate-attempt");
         }
       },
       addedfile: function(file) {
         var node, removeFileEvent, removeLink, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
         if (this.element === this.previewsContainer) {
-          this.element.classList.add("dz-started");
+          this.element.classList.add("dzs3-started");
         }
         if (this.previewsContainer) {
           file.previewElement = DropzoneS3.createElement(this.options.previewTemplate.trim());
           file.previewTemplate = file.previewElement;
           this.previewsContainer.appendChild(file.previewElement);
-          _ref = file.previewElement.querySelectorAll("[data-dz-name]");
+          _ref = file.previewElement.querySelectorAll("[data-dzs3-name]");
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             node = _ref[_i];
             node.textContent = file.name;
           }
-          _ref1 = file.previewElement.querySelectorAll("[data-dz-size]");
+          _ref1 = file.previewElement.querySelectorAll("[data-dzs3-size]");
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             node = _ref1[_j];
             node.innerHTML = this.filesize(file.size);
           }
 
           if (this.options.addRemoveLinks) {
-            file._removeLink = DropzoneS3.createElement("<a class=\"dz-remove\" href=\"javascript:undefined;\" data-dz-remove>" + this.options.dictRemoveFile + "</a>");
+            file._removeLink = DropzoneS3.createElement("<a class=\"dzs3-remove\" href=\"javascript:undefined;\" data-dzs3-remove>" + this.options.dictRemoveFile + "</a>");
             file.previewElement.appendChild(file._removeLink);
           }
           removeFileEvent = (function(_this) {
@@ -998,7 +998,7 @@
               }
             };
           })(this);
-          _ref2 = file.previewElement.querySelectorAll("[data-dz-remove]");
+          _ref2 = file.previewElement.querySelectorAll("[data-dzs3-remove]");
           _results = [];
           for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
             removeLink = _ref2[_k];
@@ -1019,8 +1019,8 @@
       thumbnail: function(file, dataUrl) {
         var thumbnailElement, _i, _len, _ref;
         if (file.previewElement) {
-          file.previewElement.classList.remove("dz-file-preview");
-          _ref = file.previewElement.querySelectorAll("[data-dz-thumbnail]");
+          file.previewElement.classList.remove("dzs3-file-preview");
+          _ref = file.previewElement.querySelectorAll("[data-dzs3-thumbnail]");
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             thumbnailElement = _ref[_i];
             thumbnailElement.alt = file.name;
@@ -1028,7 +1028,7 @@
           }
           return setTimeout(((function(_this) {
             return function() {
-              return file.previewElement.classList.add("dz-image-preview");
+              return file.previewElement.classList.add("dzs3-image-preview");
             };
           })(this)), 1);
         }
@@ -1036,11 +1036,11 @@
       error: function(file, message) {
         var node, _i, _len, _ref, _results;
         if (file.previewElement) {
-          file.previewElement.classList.add("dz-error");
+          file.previewElement.classList.add("dzs3-error");
           if (typeof message !== "String" && message.error) {
             message = message.error;
           }
-          _ref = file.previewElement.querySelectorAll("[data-dz-errormessage]");
+          _ref = file.previewElement.querySelectorAll("[data-dzs3-errormessage]");
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             node = _ref[_i];
@@ -1051,7 +1051,7 @@
       },
       processing: function(file) {
         if (file.previewElement) {
-          file.previewElement.classList.add("dz-processing");
+          file.previewElement.classList.add("dzs3-processing");
           if (file._removeLink) {
             file._removeLink.textContent = this.options.dictCancelUpload;
           }
@@ -1077,7 +1077,7 @@
           };
         })(this, file);
 
-        file.previewElement.classList.add("dz-paused");
+        file.previewElement.classList.add("dzs3-paused");
         file.previewElement.addEventListener("click", resumeFileEvent);
 
         if (!message) {
@@ -1086,18 +1086,18 @@
         if (typeof message !== "String" && message.error) {
           message = message.error;
         }
-        var _ref = file.previewElement.querySelectorAll("[data-dz-pausemessage]");
+        var _ref = file.previewElement.querySelectorAll("[data-dzs3-pausemessage]");
         for (var _i = 0, _len = _ref.length; _i < _len; _i++) {
           _ref[_i].textContent = message;
         }
       },
       resuming: function(file) {
-        file.previewElement.classList.remove("dz-paused");
+        file.previewElement.classList.remove("dzs3-paused");
       },
       uploadprogress: function(file, progress, bytesSent) {
         var node, _i, _len, _ref, _results;
         if (file.previewElement) {
-          _ref = file.previewElement.querySelectorAll("[data-dz-uploadprogress]");
+          _ref = file.previewElement.querySelectorAll("[data-dzs3-uploadprogress]");
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             node = _ref[_i];
@@ -1114,7 +1114,7 @@
       sending: noop,
       success: function(file) {
         if (file.previewElement) {
-          return file.previewElement.classList.add("dz-success");
+          return file.previewElement.classList.add("dzs3-success");
         }
       },
       canceled: function(file) {
@@ -1128,22 +1128,22 @@
           file._removeLink.textContent = this.options.dictRemoveFile;
         }
         if (file.previewElement) {
-          return file.previewElement.classList.add("dz-complete");
+          return file.previewElement.classList.add("dzs3-complete");
         }
       },
       maxfilesexceeded: noop,
       maxfilesreached: noop,
       queuecomplete: noop,
-      previewTemplate: '<div class="dz-preview dz-file-preview">' +
-        '<div class="dz-image"><img data-dz-thumbnail /></div>' +
-        '<div class="dz-details">' +
-        '<div class="dz-size"><span data-dz-size></span></div>' +
-        '<div class="dz-filename"><span data-dz-name></span></div>' +
+      previewTemplate: '<div class="dzs3-preview dzs3-file-preview">' +
+        '<div class="dzs3-image"><img data-dzs3-thumbnail /></div>' +
+        '<div class="dzs3-details">' +
+        '<div class="dzs3-size"><span data-dzs3-size></span></div>' +
+        '<div class="dzs3-filename"><span data-dzs3-name></span></div>' +
         '</div>' +
-        '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
-        '<div class="dz-error-message"><span data-dz-errormessage></span></div>' +
-        '<div class="dz-pause-message"><span data-dz-pausemessage></span></div>' +
-        '<div class="dz-success-mark">' +
+        '<div class="dzs3-progress"><span class="dzs3-upload" data-dzs3-uploadprogress></span></div>' +
+        '<div class="dzs3-error-message"><span data-dzs3-errormessage></span></div>' +
+        '<div class="dzs3-pause-message"><span data-dzs3-pausemessage></span></div>' +
+        '<div class="dzs3-success-mark">' +
         '<svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
         '<title>Check</title>' +
         '<defs></defs>' +
@@ -1152,7 +1152,7 @@
         '</g>' +
         '</svg>' +
         '</div>' +
-        '<div class="dz-error-mark">' +
+        '<div class="dzs3-error-mark">' +
         '<svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
         '<title>Error</title>' +
         '<defs></defs>' +
@@ -1163,7 +1163,7 @@
         '</g>' +
         '</svg>' +
         '</div>' +
-        '<div class="dz-resume-mark">' +
+        '<div class="dzs3-resume-mark">' +
         '<svg width="54px" height="54px" viewBox="0 0 253 253" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
         '<title>Resume</title>' +
         '<defs></defs>' +
@@ -1299,8 +1299,8 @@
       if (this.element.tagName === "form") {
         this.element.setAttribute("enctype", "multipart/form-data");
       }
-      if (this.element.classList.contains("dropzone") && !this.element.querySelector(".dz-message")) {
-        this.element.appendChild(DropzoneS3.createElement("<div class=\"dz-default dz-message\"><span>" + this.options.dictDefaultMessage + "</span></div>"));
+      if (this.element.classList.contains("dropzone") && !this.element.querySelector(".dzs3-message")) {
+        this.element.appendChild(DropzoneS3.createElement("<div class=\"dzs3-default dzs3-message\"><span>" + this.options.dictDefaultMessage + "</span></div>"));
       }
       if (this.clickableElements.length) {
         setupHiddenFileInput = (function(_this) {
@@ -1313,7 +1313,7 @@
             if ((_this.options.maxFiles === null) || _this.options.maxFiles > 1) {
               _this.hiddenFileInput.setAttribute("multiple", "multiple");
             }
-            _this.hiddenFileInput.className = "dz-hidden-input";
+            _this.hiddenFileInput.className = "dzs3-hidden-input";
             if (_this.options.acceptedFiles !== null) {
               _this.hiddenFileInput.setAttribute("accept", _this.options.acceptedFiles);
             }
@@ -1429,7 +1429,7 @@
             element: clickableElement,
             events: {
               "click": function(evt) {
-                if ((clickableElement !== _this.element) || (evt.target === _this.element || DropzoneS3.elementInside(evt.target, _this.element.querySelector(".dz-message")))) {
+                if ((clickableElement !== _this.element) || (evt.target === _this.element || DropzoneS3.elementInside(evt.target, _this.element.querySelector(".dzs3-message")))) {
                   return _this.hiddenFileInput.click();
                 }
               }
@@ -1486,7 +1486,7 @@
       if ((existingFallback = this.getExistingFallback())) {
         return existingFallback;
       }
-      fieldsString = "<div class=\"dz-fallback\">";
+      fieldsString = "<div class=\"dzs3-fallback\">";
       if (this.options.dictFallbackText) {
         fieldsString += "<p>" + this.options.dictFallbackText + "</p>";
       }
@@ -1565,7 +1565,7 @@
     DropzoneS3.prototype.disable = function() {
       var file, _i, _len, _ref, _results;
       this.clickableElements.forEach(function(element) {
-        return element.classList.remove("dz-clickable");
+        return element.classList.remove("dzs3-clickable");
       });
       this.removeEventListeners();
       _ref = this.files;
@@ -1579,7 +1579,7 @@
 
     DropzoneS3.prototype.enable = function() {
       this.clickableElements.forEach(function(element) {
-        return element.classList.add("dz-clickable");
+        return element.classList.add("dzs3-clickable");
       });
       return this.setupEventListeners();
     };
@@ -1606,9 +1606,9 @@
         if (this.getAcceptedFiles().length === this.options.maxFiles) {
           this.emit('maxfilesreached', this.files);
         }
-        return this.element.classList.add("dz-max-files-reached");
+        return this.element.classList.add("dzs3-max-files-reached");
       } else {
-        return this.element.classList.remove("dz-max-files-reached");
+        return this.element.classList.remove("dzs3-max-files-reached");
       }
     };
 
