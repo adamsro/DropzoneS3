@@ -1943,7 +1943,7 @@
 
     DropzoneS3.prototype.initUpload = function(file) {
       var _this = this,
-        params;
+        params = {};
 
       if (file.processed === false && file.accepted === true) {
         // Get s3 signature from the backend.
