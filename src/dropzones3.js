@@ -2009,8 +2009,11 @@
         this.emit("processing", file, xhr, params);
 
         xhr.timeout = 20000; // 20 seconds
-        xhr.open("GET", this.options.signing.endpoint + param(params), true);
-        xhr.send();
+        xhr.open("POST", this.options.signing.endpoint, true);
+        //Send the proper header information along with the request
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        // Convert object to url/POST friendly string and send in body
+        xhr.send(param(params));
       } else {
         throw new Error("This file can't be processed because it has already been processed or was rejected.");
       }
