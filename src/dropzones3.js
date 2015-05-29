@@ -787,13 +787,14 @@
       "removedfile",
       "thumbnail",
       "error",
-      "processing",
+      "sign",
       "filesigned",
       "fileinit",
       "enqueuing",
       "uploadprogress",
       "totaluploadprogress",
       "sending",
+      "notify",
       "success",
       "canceled",
       "complete",
@@ -801,8 +802,8 @@
       "maxfilesexceeded",
       "maxfilesreached",
       "queuecomplete",
-      "pausing",
-      "resuming"
+      "pause",
+      "resume"
     ];
 
     DropzoneS3.prototype.defaultOptions = {
@@ -815,6 +816,11 @@
       },
       signing: {
         endpoint: '/dropzones3/sign/',
+        params: {}
+      },
+      notifying: {
+        notify: true, // Tell server about the file on S3.
+        endpoint: '/dropzones3/finish/',
         params: {}
       },
       chunking: {
@@ -1059,7 +1065,7 @@
           return _results;
         }
       },
-      processing: function(file) {
+      sign: function(file) {
         if (file.previewElement) {
           file.previewElement.classList.add("dzs3-processing");
           if (file._removeLink) {
@@ -1074,7 +1080,7 @@
       fileinit: function(file, done) {
         done();
       },
-      pausing: function(file, message) {
+      pause: function(file, message) {
         if (!this.options.resuming.fileResumable) {
           return false;
         }
@@ -1101,7 +1107,7 @@
           _ref[_i].textContent = message;
         }
       },
-      resuming: function(file) {
+      resume: function(file) {
         file.previewElement.classList.remove("dzs3-paused");
       },
       uploadprogress: function(file, progress, bytesSent) {
@@ -1122,6 +1128,7 @@
       },
       totaluploadprogress: noop,
       sending: noop,
+      notify: noop,
       success: function(file) {
         if (file.previewElement) {
           return file.previewElement.classList.add("dzs3-success");
@@ -1129,9 +1136,6 @@
       },
       canceled: function(file) {
         return this.emit("error", file, "Upload canceled.");
-      },
-      finish: function(file, e, done) {
-        done(); // finish function completed
       },
       complete: function(file) {
         if (file._removeLink) {
@@ -1875,7 +1879,7 @@
       while ((file = activeFiles.shift()) && workerCount < this.options.chunking.maxConcurrentWorkers) {
         if (file.status == DropzoneS3.QUEUED && file.processed === false) {
           // Initiate the multipart upload
-          this.initUpload(file);
+          this.sign(file);
           workerCount++;
         } else if (file.upload.chunksSuccessful()) {
           // Tell amazon to complete the upload
@@ -1941,7 +1945,7 @@
       }
     };
 
-    DropzoneS3.prototype.initUpload = function(file) {
+    DropzoneS3.prototype.sign = function(file) {
       var _this = this,
         params = {};
 
@@ -2006,7 +2010,7 @@
 
         extend(params, this.options.signing.params);
 
-        this.emit("processing", file, xhr, params);
+        this.emit("sign", file, xhr, params);
 
         xhr.timeout = 20000; // 20 seconds
         xhr.open("POST", this.options.signing.endpoint, true);
@@ -2071,14 +2075,14 @@
     DropzoneS3.prototype.pauseFile = function(file) {
       if (file.status === DropzoneS3.UPLOADING) {
         file.status = DropzoneS3.PAUSED;
-        this.emit("pausing", file);
+        this.emit("pause", file);
       }
     };
 
     DropzoneS3.prototype.resumeFile = function(file) {
       var _this = this;
       if (file.status === DropzoneS3.PAUSED) {
-        _this.emit("resuming", file);
+        _this.emit("resume", file);
         file.status = DropzoneS3.QUEUED;
         return setTimeout(function() {
           return _this.processQueue();
@@ -2140,9 +2144,11 @@
       var success_callback = (function(_this, file) {
         return function(e) {
           window.localStorage.removeItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
-          _this.options.finish(file, e, function() {
-            return _this._finished(file, e.target.responseText, e);
-          });
+          if (_this.options.notifying.notify) {
+            _this.notify(file, e);
+          } else {
+            _this._finished(file, e.target.responseText, e);
+          }
         };
       })(this, file);
 
@@ -2162,6 +2168,34 @@
       })(this, file);
 
       file.upload.finishUpload(success_callback, parts_incomplete_callback, error_callback);
+    };
+
+    DropzoneS3.prototype.notify = function(file, e) {
+      var _this = this;
+      var xhr = new XMLHttpRequest();
+      xhr.onload = function() {
+        if (xhr.status / 100 !== 2) {
+          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
+        }
+        var item = JSON.parse(item);
+        file.fid = item.fid;
+        _this._finished(file, e.target.responseText, e);
+      };
+      xhr.onerror = xhr.ontimeout = function(e) {
+        return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
+      };
+      xhr.timeout = 20000; // 20 seconds
+      var params = {
+        filename: file.name,
+        filesize: file.size,
+        filemime: file.type,
+        key: file.upload.auth.key
+      };
+      extend(params, this.options.notifying.params);
+      this.emit("notify", file, xhr, params);
+      xhr.open("POST", this.options.notifying.endpoint, true);
+      xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      xhr.send(param(params));
     };
 
     DropzoneS3.prototype._finished = function(file, responseText, e) {
