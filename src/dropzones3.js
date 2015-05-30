@@ -803,7 +803,8 @@
       "maxfilesreached",
       "queuecomplete",
       "pause",
-      "resume"
+      "resume",
+      "resumed"
     ];
 
     DropzoneS3.prototype.defaultOptions = {
@@ -824,15 +825,15 @@
         params: {}
       },
       chunking: {
-        maxConcurrentWorkers: 6,
+        maxConcurrentWorkers: 5,
         maxChunkSize: 1024 * 1024 * 5 // 5 MB
       },
       resuming: {
         fileResumable: true,
         localStorageResume: true,
         localStoragePrefix: null, // Unique but consistent per instance to avoid collisions.
-        retryAttempts: 3,
-        retryInterval: 10 // seconds
+        retryAttempts: 0,
+        retryInterval: 5 // seconds
       },
       thumbnails: {
         createImageThumbnails: true,
@@ -1089,6 +1090,8 @@
             e.preventDefault();
             e.stopPropagation();
             file.previewElement.removeEventListener("click", resumeFileEvent);
+            file.paused = false;
+            _this.emit("resumed", file);
             _this.resumeFile(file);
           };
         })(this, file);
@@ -1107,7 +1110,8 @@
           _ref[_i].textContent = message;
         }
       },
-      resume: function(file) {
+      resume: noop,
+      resumed: function(file) {
         file.previewElement.classList.remove("dzs3-paused");
       },
       uploadprogress: function(file, progress, bytesSent) {
@@ -2011,6 +2015,10 @@
 
       var progress_callback = (function(_this, file, chunkNum) {
         return function(e) {
+          if (file.paused === true) {
+            _this.emit("resumed", file);
+            file.paused = false;
+          }
           file.upload.setChunkProgress(chunkNum, e.loaded);
           // update the last_progress_time for the watcher interval
           file.upload.progressDate = new Date();
@@ -2052,18 +2060,19 @@
       file.upload.uploadChunk(chunkNum, load_callback, error_callback, progress_callback);
     };
 
-    DropzoneS3.prototype.pauseFile = function(file) {
-      if (file.status === DropzoneS3.UPLOADING) {
+    DropzoneS3.prototype.pauseFile = function(file, message) {
+      if (!!(file.status == DropzoneS3.PROCESSING || file.status == DropzoneS3.UPLOADING || file.status == DropzoneS3.FINISHING)) {
         file.status = DropzoneS3.PAUSED;
-        this.emit("pause", file);
+        file.paused = true;
+        this.emit("pause", file, message);
       }
     };
 
     DropzoneS3.prototype.resumeFile = function(file) {
       var _this = this;
       if (file.status === DropzoneS3.PAUSED) {
-        _this.emit("resume", file);
         file.status = DropzoneS3.QUEUED;
+        _this.emit("resume", file);
         return setTimeout(function() {
           return _this.processQueue();
         }, 0);
@@ -2181,6 +2190,10 @@
     DropzoneS3.prototype._finished = function(file, responseText, e) {
       var _this = this;
       file.status = DropzoneS3.SUCCESS;
+      if (file.paused === true) {
+        _this.emit("resumed", file);
+        file.paused = false;
+      }
       this.emit("success", file, responseText, e);
       this.emit("complete", file);
       return setTimeout(function() {
@@ -2196,18 +2209,21 @@
         return;
       } else if (xhr && (xhr.status === 0 || xhr.status == 404) && this.options.resuming.fileResumable && isInResumableState) {
         // Connection error: pause download.
-        file.status = DropzoneS3.PAUSED;
-        if (file.retryAttemptsRemaining > 0) {
-          this.emit("pause", file, _this.options.dictConnectionError.replace("{{seconds}}", this.options.resuming.retryInterval));
+        if (_this.options.resuming.retryAttempts === 0 || file.retryAttemptsRemaining > 0) {
+          this.pauseFile(file, _this.options.dictConnectionError.replace("{{seconds}}", this.options.resuming.retryInterval));
           file.retryAttemptsRemaining -= 1;
           return setTimeout(function() {
             _this.resumeFile(file);
           }, _this.options.resuming.retryInterval * 1000);
         } else {
-          this.emit("pause", file, _this.options.dictResumeUpload);
+          this.pauseFile(file, _this.options.dictResumeUpload);
         }
       } else {
         file.status = DropzoneS3.ERROR;
+        if (file.paused === true) {
+          _this.emit("resumed", file);
+          file.paused = false;
+        }
         window.localStorage.removeItem(this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
         this.emit("error", file, message, xhr);
         this.emit("complete", file);
