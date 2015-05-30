@@ -1158,33 +1158,13 @@
         '<div class="dzs3-error-message"><span data-dzs3-errormessage></span></div>' +
         '<div class="dzs3-pause-message"><span data-dzs3-pausemessage></span></div>' +
         '<div class="dzs3-success-mark">' +
-        '<svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
-        '<title>Check</title>' +
-        '<defs></defs>' +
-        '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">' +
-        '<path d="M23.5,31.8431458 L17.5852419,25.9283877 C16.0248253,24.3679711 13.4910294,24.366835 11.9289322,25.9289322 C10.3700136,27.4878508 10.3665912,30.0234455 11.9283877,31.5852419 L20.4147581,40.0716123 C20.5133999,40.1702541 20.6159315,40.2626649 20.7218615,40.3488435 C22.2835669,41.8725651 24.794234,41.8626202 26.3461564,40.3106978 L43.3106978,23.3461564 C44.8771021,21.7797521 44.8758057,19.2483887 43.3137085,17.6862915 C41.7547899,16.1273729 39.2176035,16.1255422 37.6538436,17.6893022 L23.5,31.8431458 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z" id="Oval-2" stroke-opacity="0.198794158" stroke="#747474" fill-opacity="0.816519475" fill="#FFFFFF" sketch:type="MSShapeGroup"></path>' +
-        '</g>' +
-        '</svg>' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54" version="1.1"><title>Check</title><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><path d="M23.5 31.8L17.6 25.9C16 24.4 13.5 24.4 11.9 25.9 10.4 27.5 10.4 30 11.9 31.6L20.4 40.1C20.5 40.2 20.6 40.3 20.7 40.3 22.3 41.9 24.8 41.9 26.3 40.3L43.3 23.3C44.9 21.8 44.9 19.2 43.3 17.7 41.8 16.1 39.2 16.1 37.7 17.7L23.5 31.8ZM27 53C41.4 53 53 41.4 53 27 53 12.6 41.4 1 27 1 12.6 1 1 12.6 1 27 1 41.4 12.6 53 27 53Z" stroke-opacity="0.2" stroke="#747474" fill-opacity="0.8" fill="#FFFFFF"/></g></svg>' +
         '</div>' +
         '<div class="dzs3-error-mark">' +
-        '<svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
-        '<title>Error</title>' +
-        '<defs></defs>' +
-        '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">' +
-        '<g id="Check-+-Oval-2" sketch:type="MSLayerGroup" stroke="#747474" stroke-opacity="0.198794158" fill="#FFFFFF" fill-opacity="0.816519475">' +
-        '<path d="M32.6568542,29 L38.3106978,23.3461564 C39.8771021,21.7797521 39.8758057,19.2483887 38.3137085,17.6862915 C36.7547899,16.1273729 34.2176035,16.1255422 32.6538436,17.6893022 L27,23.3431458 L21.3461564,17.6893022 C19.7823965,16.1255422 17.2452101,16.1273729 15.6862915,17.6862915 C14.1241943,19.2483887 14.1228979,21.7797521 15.6893022,23.3461564 L21.3431458,29 L15.6893022,34.6538436 C14.1228979,36.2202479 14.1241943,38.7516113 15.6862915,40.3137085 C17.2452101,41.8726271 19.7823965,41.8744578 21.3461564,40.3106978 L27,34.6568542 L32.6538436,40.3106978 C34.2176035,41.8744578 36.7547899,41.8726271 38.3137085,40.3137085 C39.8758057,38.7516113 39.8771021,36.2202479 38.3106978,34.6538436 L32.6568542,29 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z" id="Oval-2" sketch:type="MSShapeGroup"></path>' +
-        '</g>' +
-        '</g>' +
-        '</svg>' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54" version="1.1"><title>Error</title><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g stroke="#747474" stroke-opacity="0.2" fill="#FFFFFF" fill-opacity="0.8"><path d="M32.7 29L38.3 23.3C39.9 21.8 39.9 19.2 38.3 17.7 36.8 16.1 34.2 16.1 32.7 17.7L27 23.3 21.3 17.7C19.8 16.1 17.2 16.1 15.7 17.7 14.1 19.2 14.1 21.8 15.7 23.3L21.3 29 15.7 34.7C14.1 36.2 14.1 38.8 15.7 40.3 17.2 41.9 19.8 41.9 21.3 40.3L27 34.7 32.7 40.3C34.2 41.9 36.8 41.9 38.3 40.3 39.9 38.8 39.9 36.2 38.3 34.7L32.7 29ZM27 53C41.4 53 53 41.4 53 27 53 12.6 41.4 1 27 1 12.6 1 1 12.6 1 27 1 41.4 12.6 53 27 53Z"/></g></g></svg>' +
         '</div>' +
         '<div class="dzs3-resume-mark">' +
-        '<svg width="54px" height="54px" viewBox="0 0 253 253" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">' +
-        '<title>Resume</title>' +
-        '<defs></defs>' +
-        '<g id="Check-+-Oval-2" sketch:type="MSLayerGroup" stroke="#747474" stroke-opacity="0.198794158" fill="#FFFFFF" fill-opacity="0.816519475">' +
-        '<path d="M126.5,253 C196.364021,253 253,196.364021 253,126.5 C253,56.6359792 196.364021,0 126.5,0 C56.6359792,0 0,56.6359792 0,126.5 C0,196.364021 56.6359792,253 126.5,253 Z M82.678324,213.191925 C76.9189197,216.471979 72.25,213.761465 72.25,207.13597 L72.25,45.8640298 C72.25,39.2393642 76.9235422,36.5273677 82.678324,39.8007434 L224.571676,120.511057 C230.33108,123.787062 230.326458,129.10443 224.571676,132.381852 L82.678324,213.191925 Z" id="Oval-8" fill="#FFFFFF" sketch:type="MSShapeGroup"></path>' +
-        '</g>' +
-        '</svg>' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54" version="1.1"><title>Continue</title><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><path d="M27 53C41.4 53 53 41.4 53 27 53 12.6 41.4 1 27 1 12.6 1 1 12.6 1 27 1 41.4 12.6 53 27 53ZM16.9 19.9L13.2 19.9 13.2 33.9 16.9 33.9 16.9 19.9 16.9 19.9ZM19.9 19.9L29.1 19.9 29 13.6C29 12 30 11.5 31.3 12.6L46.4 25.1C47.7 26.1 47.7 27.8 46.4 28.9L31.6 41.1C30.3 42.1 29.2 41.6 29.2 40L29.2 33.9 29.2 33.9 19.9 33.9 19.9 19.9 19.9 19.9ZM10.2 19.9L10 19.9C8.3 19.9 7 21.2 7 22.9L7 30.9C7 32.5 8.3 33.9 10 33.9L10.2 33.9 10.2 19.9Z" stroke-opacity="0.2" stroke="#747474" fill-opacity="0.8" fill="#FFFFFF"/></g></svg>' +
         '</div>' +
         '</div>'
     };
