@@ -540,7 +540,8 @@
                 callback(true);
               } else {
                 // Process either not initiated or aborted so start from scratch.
-                _this.init(_this.auth, _this.key, true, _this.chunkSize, callback);
+                _this.auth.uploadId = null;
+                _this.init(_this.auth, _this.key, ssencrypt, callback, error_callback);
               }
             }, function() {
               error_callback(e);
@@ -833,7 +834,7 @@
         localStorageResume: true,
         localStoragePrefix: null, // Unique but consistent per instance to avoid collisions.
         retryAttempts: 0,
-        retryInterval: 5 // seconds
+        retryInterval: 10 // seconds
       },
       thumbnails: {
         createImageThumbnails: true,
@@ -1938,11 +1939,16 @@
         var xhr = new XMLHttpRequest();
 
         xhr.onload = function() {
+          var auth;
           if (xhr.status / 100 !== 2) {
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
           }
           // Got signature, signature date, and key from server.
-          var auth = JSON.parse(xhr.responseText);
+          try {
+            auth = JSON.parse(xhr.responseText);
+          } catch (ex) {
+            _this._errorProcessing(file, ex.message);
+          }
 
           // See if file has an uploadID from a previous upload attempt and try to resume.
           if (_this.options.resuming.localStorageResume === true && _this.options.validation.allowDuplicates === false) {
@@ -2015,7 +2021,7 @@
 
       var progress_callback = (function(_this, file, chunkNum) {
         return function(e) {
-          if (file.paused === true) {
+          if (file.paused === true && file.upload.chunks[chunkNum].bytesSent < e.loaded) {
             _this.emit("resumed", file);
             file.paused = false;
           }
@@ -2166,9 +2172,13 @@
         if (xhr.status / 100 !== 2) {
           return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
         }
-        var item = JSON.parse(item);
-        file.fid = item.fid;
-        _this._finished(file, e.target.responseText, e);
+        try {
+          var item = JSON.parse(item);
+          file.fid = item.fid;
+          _this._finished(file, e.target.responseText, e);
+        } catch (ex) {
+          _this._errorProcessing(file, ex.message);
+        }
       };
       xhr.onerror = xhr.ontimeout = function(e) {
         return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
