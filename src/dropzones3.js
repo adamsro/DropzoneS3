@@ -2198,13 +2198,13 @@
         // Connection error: pause download.
         file.status = DropzoneS3.PAUSED;
         if (file.retryAttemptsRemaining > 0) {
-          this.emit("pausing", file, _this.options.dictConnectionError.replace("{{seconds}}", this.options.resuming.retryInterval));
+          this.emit("pause", file, _this.options.dictConnectionError.replace("{{seconds}}", this.options.resuming.retryInterval));
           file.retryAttemptsRemaining -= 1;
           return setTimeout(function() {
             _this.resumeFile(file);
           }, _this.options.resuming.retryInterval * 1000);
         } else {
-          this.emit("pausing", file, _this.options.dictResumeUpload);
+          this.emit("pause", file, _this.options.dictResumeUpload);
         }
       } else {
         file.status = DropzoneS3.ERROR;
