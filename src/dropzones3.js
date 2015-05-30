@@ -2039,6 +2039,8 @@
             return;
           }
           if (e.target.status / 100 != 2) {
+            file.upload.resetChunk(chunkNum);
+            _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
             return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
           }
           file.retryAttemptsRemaining = _this.options.resuming.retryAttempts;
@@ -2213,11 +2215,12 @@
 
     DropzoneS3.prototype._errorProcessing = function(file, message, xhr) {
       var _this = this,
-        isInResumableState = !!(file.status == DropzoneS3.PROCESSING || file.status == DropzoneS3.UPLOADING || file.status == DropzoneS3.FINISHING);
+        isInResumableState = !!(file.status == DropzoneS3.PROCESSING || file.status == DropzoneS3.UPLOADING || file.status == DropzoneS3.FINISHING),
+        isResumableError = !!(xhr && (xhr.status === 0 || xhr.status == 404 || (xhr.status == 400 && xhr.target.responseXML.indexOf('RequestTimeout') !== -1)));
 
-      if (xhr && xhr.status === 0 && file.status == DropzoneS3.PAUSED) {
+      if (isResumableError && file.status == DropzoneS3.PAUSED) {
         return;
-      } else if (xhr && (xhr.status === 0 || xhr.status == 404) && this.options.resuming.fileResumable && isInResumableState) {
+      } else if (this.options.resuming.fileResumable && isResumableError && isInResumableState) {
         // Connection error: pause download.
         if (_this.options.resuming.retryAttempts === 0 || file.retryAttemptsRemaining > 0) {
           this.pauseFile(file, _this.options.dictConnectionError.replace("{{seconds}}", this.options.resuming.retryInterval));
