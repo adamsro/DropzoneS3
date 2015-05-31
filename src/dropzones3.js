@@ -1995,7 +1995,7 @@
               }, function(e) {
                 // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
                 var recoverableResponseCodes = [0, 500, 503];
-                if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseXML.indexOf('RequestTimeout') !== -1)) {
+                if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseText.indexOf('RequestTimeout') !== -1)) {
                   return _this._recoverableError(file, e.target);
                 } else {
                   return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
@@ -2077,7 +2077,7 @@
 
           // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
           var recoverableResponseCodes = [0, 500, 503];
-          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseXML.indexOf('RequestTimeout') !== -1)) {
+          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseText.indexOf('RequestTimeout') !== -1)) {
             file.upload.resetChunk(chunkNum);
             _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
             return _this._recoverableError(file, e.target);
@@ -2118,7 +2118,7 @@
         return function(e) {
           // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
           var recoverableResponseCodes = [0, 500, 503];
-          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseXML.indexOf('RequestTimeout') !== -1)) {
+          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseText.indexOf('RequestTimeout') !== -1)) {
             return _this._recoverableError(file, e.target);
           } else {
             return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
@@ -2193,7 +2193,7 @@
         return function(e) {
           // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
           var recoverableResponseCodes = [0, 500, 503];
-          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseXML.indexOf('RequestTimeout') !== -1)) {
+          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseText.indexOf('RequestTimeout') !== -1)) {
             return _this._recoverableError(file, e.target);
           } else {
             return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
