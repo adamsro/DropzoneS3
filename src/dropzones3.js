@@ -501,7 +501,7 @@
       return chunks;
     };
 
-    S3File.prototype.init = function(auth, key, ssencrypt, callback, error_callback) {
+    S3File.prototype.init = function(auth, key, ssencrypt, success_callback, error_callback) {
       var _this = this;
       this.auth = auth;
       this.auth.date = new Date(auth.date);
@@ -516,7 +516,7 @@
           var xml = e.target.responseXML;
           _this.auth.uploadId = xml.getElementsByTagName('UploadId')[0].textContent;
           _this.chunks = initChunkArray(_this.file.size, _this.chunkSize);
-          callback(false);
+          success_callback(false);
         }, error_callback);
       } else {
         // UploadId was saved in backend. Get the uploaded parts from S3
@@ -524,7 +524,7 @@
           // Got part list from Amazon
           _this.chunks = updateChunks(parts, _this.file.size, _this.chunkSize);
           // Process the queue
-          callback(false);
+          success_callback(false);
         }, function(e) {
           if (e.target.status === 404 && e.target.responseText.indexOf("NoSuchUpload") !== -1) {
             // The specified multipart upload does not exist. The upload ID
@@ -537,11 +537,11 @@
                   _this.setChunkComplete(chunks[i]);
                 }
                 // Tell the callback that the file already exists
-                callback(true);
+                success_callback(true);
               } else {
                 // Process either not initiated or aborted so start from scratch.
                 _this.auth.uploadId = null;
-                _this.init(_this.auth, _this.key, ssencrypt, callback, error_callback);
+                _this.init(_this.auth, _this.key, ssencrypt, success_callback, error_callback);
               }
             }, function() {
               error_callback(e);
@@ -581,8 +581,15 @@
       return true;
     };
 
-    S3File.prototype.uploadChunk = function(chunkNum, load_callback, error_callback, progress_callback) {
+    S3File.prototype.uploadChunk = function(chunkNum, success_callback, error_callback, progress_callback) {
       var _this = this,
+        load_callback = function(e) {
+          if (e.target.status / 100 == 2) {
+            success_callback(e);
+          } else {
+            error_callback(e);
+          }
+        },
         callbacks = {
           "load_callback": load_callback,
           "error_callback": error_callback,
@@ -830,10 +837,10 @@
         maxChunkSize: 1024 * 1024 * 5 // 5 MB
       },
       resuming: {
-        fileResumable: true,
+        automaticRetry: true,
         localStorageResume: true,
         localStoragePrefix: null, // Unique but consistent per instance to avoid collisions.
-        retryAttempts: 0,
+        retryAttempts: 0, // 0  = infinit retry attempts
         retryInterval: 10 // seconds
       },
       thumbnails: {
@@ -862,7 +869,7 @@
       dictFileTooBig: "File is too big ({{filesize}}MiB). Max filesize: {{maxFilesize}}MiB.",
       dictInvalidFileType: "You can't upload files of this type.",
       dictResponseError: "Server responded with {{statusCode}} code.",
-      dictConnectionError: "Connection error. will retry upload in {{seconds}} seconds.",
+      dictConnectionError: "Connection error. Will retry upload in {{seconds}} seconds.",
       dictCancelUpload: "Cancel upload",
       dictResumeUpload: "Connection Error. Click to resume.",
       dictCancelUploadConfirmation: "Are you sure you want to cancel this upload?",
@@ -1083,7 +1090,7 @@
         done();
       },
       pause: function(file, message) {
-        if (!this.options.resuming.fileResumable) {
+        if (!this.options.resuming.automaticRetry) {
           return false;
         }
         var resumeFileEvent = (function(_this, file) {
@@ -1701,6 +1708,7 @@
 
       file.processed = false;
       file.isDuplicate = false;
+      file.s3success = false;
       file.retryAttemptsRemaining = this.options.resuming.retryAttempts;
 
       if (this.options.validation.allowDuplicates === false && this.files.length) {
@@ -1736,7 +1744,7 @@
         return function(error) {
           if (error) {
             file.accepted = false;
-            _this._errorProcessing(file, error);
+            _this._fatalError(file, error);
           } else {
             file.accepted = true;
             if (_this.options.autoQueue) {
@@ -1866,10 +1874,13 @@
           // Initiate the multipart upload
           this.sign(file);
           workerCount++;
-        } else if (file.upload.chunksSuccessful()) {
+        } else if (!file.s3success && file.upload.chunksSuccessful()) {
           // Tell amazon to complete the upload
           this.finishUpload(file);
           workerCount++;
+        } else if (file.s3success && this.options.notifying.notify) {
+          // Retry notifying the server of the successful upload to s3 if it failed previously.
+          this.notify(file);
         } else {
           // Start PUT requests uploading chunks
           while ((chunkNum = file.upload.getNextQueuedChunk()) !== false && workerCount < this.options.chunking.maxConcurrentWorkers) {
@@ -1940,57 +1951,66 @@
 
         xhr.onload = function() {
           var auth;
-          if (xhr.status / 100 !== 2) {
-            return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
-          }
-          // Got signature, signature date, and key from server.
-          try {
-            auth = JSON.parse(xhr.responseText);
-          } catch (ex) {
-            _this._errorProcessing(file, ex.message);
-          }
-
-          // See if file has an uploadID from a previous upload attempt and try to resume.
-          if (_this.options.resuming.localStorageResume === true && _this.options.validation.allowDuplicates === false) {
-            var item;
-            if ((item = window.localStorage.getItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified })))) {
-              item = JSON.parse(item);
-              auth.uploadId = item.u;
-              auth.key = item.k;
+          if (xhr.status / 100 == 2) {
+            // Got signature, signature date, and key from server.
+            try {
+              auth = JSON.parse(xhr.responseText);
+            } catch (ex) {
+              _this._fatalError(file, ex.message);
             }
-          }
 
-          auth.region = _this.options.s3.region;
-          auth.bucket = _this.options.s3.bucket;
-          auth.access_key = _this.options.s3.accesskey;
-          auth.acl = _this.options.s3.acl;
-
-          _this.emit("filesigned", file, auth, function() {
-            // Initiate multipart upload with Amazon.
-            file.upload.init(auth, auth.key, _this.options.s3.ssencrypt, function(status) {
-              file.processed = true;
-              if (status) {
-                _this._finished(file);
-              } else {
-                // Save uploadId in case resume is needed.
-                if (_this.options.resuming.localStorageResume === true && _this.options.validation.allowDuplicates === false) {
-                  window.localStorage.setItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified }), JSON.stringify({ "u": file.upload.auth.uploadId, "k": file.upload.auth.key }));
-                }
-                _this.emit("fileinit", file, function() {
-                  file.status = DropzoneS3.QUEUED;
-                  return setTimeout(function() {
-                    return _this.processQueue();
-                  }, 0);
-                });
+            // See if file has an uploadID from a previous upload attempt and try to resume.
+            if (_this.options.resuming.localStorageResume === true && _this.options.validation.allowDuplicates === false) {
+              var item;
+              if ((item = window.localStorage.getItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified })))) {
+                item = JSON.parse(item);
+                auth.uploadId = item.u;
+                auth.key = item.k;
               }
-            }, function(e) {
-              return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+            }
+
+            auth.region = _this.options.s3.region;
+            auth.bucket = _this.options.s3.bucket;
+            auth.access_key = _this.options.s3.accesskey;
+            auth.acl = _this.options.s3.acl;
+
+            _this.emit("filesigned", file, auth, function() {
+              // Initiate multipart upload with Amazon.
+              file.upload.init(auth, auth.key, _this.options.s3.ssencrypt, function(status) {
+                file.processed = true;
+                if (status) {
+                  _this._finished(file);
+                } else {
+                  // Save uploadId in case resume is needed.
+                  if (_this.options.resuming.localStorageResume === true && _this.options.validation.allowDuplicates === false) {
+                    window.localStorage.setItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified }), JSON.stringify({ "u": file.upload.auth.uploadId, "k": file.upload.auth.key }));
+                  }
+                  _this.emit("fileinit", file, function() {
+                    file.status = DropzoneS3.QUEUED;
+                    return setTimeout(function() {
+                      return _this.processQueue();
+                    }, 0);
+                  });
+                }
+              }, function(e) {
+                // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
+                var recoverableResponseCodes = [0, 500, 503];
+                if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseXML.indexOf('RequestTimeout') !== -1)) {
+                  return _this._recoverableError(file, e.target);
+                } else {
+                  return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+                }
+              });
             });
-          });
+          } else if (xhr.status / 100 == 5) {
+            _this._recoverableError(file, xhr.status);
+          } else {
+            return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
+          }
         };
 
         xhr.onerror = xhr.ontimeout = function(e) {
-          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+          return _this._recoverableError(file, e.target);
         };
 
         file.status = DropzoneS3.PROCESSING;
@@ -2032,16 +2052,11 @@
         };
       })(this, file, chunkNum);
 
-      var load_callback = (function(_this, file, chunkNum) {
+      var success_callback = (function(_this, file, chunkNum) {
         return function(e) {
           var _ref;
           if (file.status === DropzoneS3.CANCELED) {
             return;
-          }
-          if (e.target.status / 100 != 2) {
-            file.upload.resetChunk(chunkNum);
-            _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
-            return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
           }
           file.retryAttemptsRemaining = _this.options.resuming.retryAttempts;
           file.upload.setChunkComplete(chunkNum);
@@ -2049,7 +2064,6 @@
           setTimeout(function() {
             _this.processQueue();
           }, 0);
-
         };
       })(this, file, chunkNum);
 
@@ -2060,16 +2074,26 @@
           }
           file.upload.resetChunk(chunkNum);
           _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
-          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+
+          // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
+          var recoverableResponseCodes = [0, 500, 503];
+          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseXML.indexOf('RequestTimeout') !== -1)) {
+            file.upload.resetChunk(chunkNum);
+            _this.emit("uploadprogress", file, file.upload.getTotalProgress(), file.upload.getBytesSent());
+            return _this._recoverableError(file, e.target);
+          } else {
+            return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+          }
         };
       })(this, file, chunkNum);
 
       // this.emit("sending", file, xhr, formData);
-      file.upload.uploadChunk(chunkNum, load_callback, error_callback, progress_callback);
+      file.upload.uploadChunk(chunkNum, success_callback, error_callback, progress_callback);
     };
 
     DropzoneS3.prototype.pauseFile = function(file, message) {
-      if (!!(file.status == DropzoneS3.PROCESSING || file.status == DropzoneS3.UPLOADING || file.status == DropzoneS3.FINISHING)) {
+      var validStatuses = [DropzoneS3.PROCESSING, DropzoneS3.UPLOADING, DropzoneS3.FINISHING, DropzoneS3.NOTIFYING];
+      if (validStatuses.indexOf(file.status) != -1) {
         file.status = DropzoneS3.PAUSED;
         file.paused = true;
         this.emit("pause", file, message);
@@ -2092,7 +2116,13 @@
       // Abort all sending requests and send an abort request to Amazon to deallocate space
       file.upload.abort(noop, (function(_this, file) {
         return function(e) {
-          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+          // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
+          var recoverableResponseCodes = [0, 500, 503];
+          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseXML.indexOf('RequestTimeout') !== -1)) {
+            return _this._recoverableError(file, e.target);
+          } else {
+            return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+          }
         };
       })(this, file));
       file.status = DropzoneS3.CANCELED;
@@ -2140,9 +2170,10 @@
 
       var success_callback = (function(_this, file) {
         return function(e) {
+          file.s3success = true;
           window.localStorage.removeItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
           if (_this.options.notifying.notify) {
-            _this.notify(file, e);
+            _this.notify(file);
           } else {
             _this._finished(file, e.target.responseText, e);
           }
@@ -2150,7 +2181,7 @@
       })(this, file);
 
       var parts_incomplete_callback = (function(_this, file) {
-        return function() {
+        return function(e) {
           file.status = DropzoneS3.UPLOADING;
           return setTimeout(function() {
             return _this.processQueue();
@@ -2160,32 +2191,46 @@
 
       var error_callback = (function(_this, file) {
         return function(e) {
-          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+          // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
+          var recoverableResponseCodes = [0, 500, 503];
+          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseXML.indexOf('RequestTimeout') !== -1)) {
+            return _this._recoverableError(file, e.target);
+          } else {
+            return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+          }
         };
       })(this, file);
 
       file.upload.finishUpload(success_callback, parts_incomplete_callback, error_callback);
     };
 
-    DropzoneS3.prototype.notify = function(file, e) {
+    DropzoneS3.prototype.notify = function(file) {
       var _this = this;
       var xhr = new XMLHttpRequest();
+
+      file.status = DropzoneS3.NOTIFYING;
+
       xhr.onload = function() {
-        if (xhr.status / 100 !== 2) {
-          return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
-        }
-        try {
-          var item = JSON.parse(item);
-          file.fid = item.fid;
-          _this._finished(file, e.target.responseText, e);
-        } catch (ex) {
-          _this._errorProcessing(file, ex.message);
+        if (xhr.status / 100 == 2) {
+          try {
+            var item = JSON.parse(xhr.responseText);
+            file.fid = item.fid;
+            _this._finished(file, xhr.responseText, xhr);
+          } catch (ex) {
+            _this._fatalError(file, ex.message);
+          }
+        } else if (xhr.status / 100 == 5) {
+          // Hopefully a temporary server error
+          return _this._recoverableError(file, xhr);
+        } else {
+          return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
         }
       };
       xhr.onerror = xhr.ontimeout = function(e) {
-        return _this._errorProcessing(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
+        return _this._recoverableError(file, e.target);
       };
       xhr.timeout = 20000; // 20 seconds
+
       var params = {
         filename: file.name,
         filesize: file.size,
@@ -2213,34 +2258,32 @@
       }, 0);
     };
 
-    DropzoneS3.prototype._errorProcessing = function(file, message, xhr) {
-      var _this = this,
-        isInResumableState = !!(file.status == DropzoneS3.PROCESSING || file.status == DropzoneS3.UPLOADING || file.status == DropzoneS3.FINISHING),
-        isResumableError = !!(xhr && (xhr.status === 0 || xhr.status == 404 || (xhr.status == 400 && xhr.target.responseXML.indexOf('RequestTimeout') !== -1)));
-
-      if (isResumableError && file.status == DropzoneS3.PAUSED) {
+    DropzoneS3.prototype._recoverableError = function(file, xhr) {
+      var _this = this;
+      if (file.status == DropzoneS3.PAUSED) {
         return;
-      } else if (this.options.resuming.fileResumable && isResumableError && isInResumableState) {
-        // Connection error: pause download.
-        if (_this.options.resuming.retryAttempts === 0 || file.retryAttemptsRemaining > 0) {
-          this.pauseFile(file, _this.options.dictConnectionError.replace("{{seconds}}", this.options.resuming.retryInterval));
-          file.retryAttemptsRemaining -= 1;
-          return setTimeout(function() {
-            _this.resumeFile(file);
-          }, _this.options.resuming.retryInterval * 1000);
-        } else {
-          this.pauseFile(file, _this.options.dictResumeUpload);
-        }
-      } else {
-        file.status = DropzoneS3.ERROR;
-        if (file.paused === true) {
-          _this.emit("resumed", file);
-          file.paused = false;
-        }
-        window.localStorage.removeItem(this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
-        this.emit("error", file, message, xhr);
-        this.emit("complete", file);
       }
+      if (this.options.resuming.automaticRetry && (this.options.resuming.retryAttempts === 0 || file.retryAttemptsRemaining > 0)) {
+        this.pauseFile(file, this.options.dictConnectionError.replace("{{seconds}}", this.options.resuming.retryInterval));
+        file.retryAttemptsRemaining -= 1;
+        return setTimeout(function() {
+          _this.resumeFile(file);
+        }, _this.options.resuming.retryInterval * 1000);
+      } else {
+        this.pauseFile(file, _this.options.dictResumeUpload);
+      }
+    };
+
+    DropzoneS3.prototype._fatalError = function(file, message, xhr) {
+      var _this = this;
+      file.status = DropzoneS3.ERROR;
+      if (file.paused === true) {
+        _this.emit("resumed", file);
+        file.paused = false;
+      }
+      window.localStorage.removeItem(this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
+      this.emit("error", file, message, xhr);
+      this.emit("complete", file);
       return setTimeout(function() {
         return _this.processQueue();
       }, 0);
@@ -2438,6 +2481,8 @@
   DropzoneS3.PAUSED = "paused";
 
   DropzoneS3.FINISHING = "finishing";
+
+  DropzoneS3.NOTIFYING = "notifying";
 
   DropzoneS3.CANCELED = "canceled";
 
