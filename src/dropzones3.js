@@ -833,7 +833,7 @@
         params: {}
       },
       chunking: {
-        maxConcurrentWorkers: 5,
+        maxConcurrentWorkers: 6,
         maxChunkSize: 1024 * 1024 * 5 // 5 MB
       },
       resuming: {
