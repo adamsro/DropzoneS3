@@ -157,13 +157,6 @@
   }
 
   &.dzs3-file-preview {
-
-    .dzs3-image {
-      border-radius: $image-border-radius;
-      background: #999;
-      background: linear-gradient(to bottom, #eee, #ddd);
-    }
-
     .dzs3-details {
       opacity: 1;
     }
@@ -171,8 +164,12 @@
 
   &.dzs3-image-preview {
     background: white;
+    border-radius: $image-border-radius;
     .dzs3-details {
       @include prefix((transition: opacity 0.2s linear));
+    }
+    .dzs3-image {
+      border-radius: $image-border-radius;
     }
   }
 
@@ -257,7 +254,6 @@
     }
   }
   .dzs3-image {
-    border-radius: $image-border-radius;
     overflow: hidden;
     width: $image-size;
     height: $image-size;
@@ -440,4 +436,49 @@
     @include prefix((transform: scale(1.2)));
   }
 
+}
+
+.dzs3-file-preview {
+  .dzs3-ext {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/upload.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .dzs3-ext-txt, .dzs3-ext-log, .dzs3-ext-tex, .dzs3-ext-fnt, .dzs3-ext-fon, .dzs3-ext-otf, .dzs3-ext-ttf  {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/Text File.svg');
+  }
+  .dzs3-ext-doc, .dzs3-ext-docx, .dzs3-ext-gdoc, .dzs3-ext-msg, .dzs3-ext-odt, .dzs3-ext-pages, .dzs3-ext-rtf, .dzs3-ext-wpd, .dzs3-ext-wps {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/Document File.svg');
+  }
+  .dzs3-ext-pdf {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/PDF.svg');
+  }
+  .dzs3-ext-pps, .dzs3-ext-ppt, .dzs3-ext-pptx, .dzs3-ext-key {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/Presentation.svg');
+  }
+  .dzs3-ext-csv, .dzs3-ext-gsheet , .dzs3-ext-xlr , .dzs3-ext-xls , .dzs3-ext-xlxs {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/Spread Sheet.svg');
+  }
+  .dzs3-ext-bmp, .dzs3-ext-dds, .dzs3-ext-gif, .dzs3-ext-jpg, .dzs3-ext-png, .dzs3-ext-psd, .dzs3-ext-pspimage, .dzs3-ext-tga, .dzs3-ext-thm, .dzs3-ext-tif, .dzs3-ext-tiff, .dzs3-ext-yuv {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/Image.svg');
+  }
+  .dzs3-ext-aif, .dzs3-ext-iff, .dzs3-ext-m3u, .dzs3-ext-m4a, .dzs3-ext-mid, .dzs3-ext-mp3, .dzs3-ext-mpa, .dzs3-ext-ra, .dzs3-ext-wav, .dzs3-ext-wma {
+   background-image: inline_svg_image('../assets/filetype-icons/optimized/Music.svg');
+  }
+  .dzs3-ext-ai, .dzs3-ext-eps, .dzs3-ext-ps, .dzs3-ext-svg {
+   background-image: inline_svg_image('../assets/filetype-icons/optimized/vector.svg');
+  }
+  .dzs3-ext-3g2, .dzs3-ext-3gp, .dzs3-ext-asf, .dzs3-ext-asx, .dzs3-ext-avi, .dzs3-ext-flv, .dzs3-ext-m4v, .dzs3-ext-mov, .dzs3-ext-mp4, .dzs3-ext-mpg, .dzs3-ext-rm, .dzs3-ext-srt, .dzs3-ext-swf, .dzs3-ext-vob, .dzs3-ext-wmv {
+   background-image: inline_svg_image('../assets/filetype-icons/optimized/Movie.svg');
+  }
+  .dzs3-ext-7z, .dzs3-ext-cbr, .dzs3-ext-deb, .dzs3-ext-gz, .dzs3-ext-pkg, .dzs3-ext-rar, .dzs3-ext-rpm, .dzs3-ext-sitx, .dzs3-ext-tar.gz, .dzs3-ext-zip, .dzs3-ext-zipx, .dzs3-ext-bin, .dzs3-ext-cue, .dzs3-ext-dmg, .dzs3-ext-iso, .dzs3-ext-mdf, .dzs3-ext-toast, .dzs3-ext-vcd, .dzs3-ext-tar {
+   background-image: inline_svg_image('../assets/filetype-icons/optimized/Zip.svg');
+  }
+  .dzs3-ext-c, .dzs3-ext-class, .dzs3-ext-cpp, .dzs3-ext-cs, .dzs3-ext-dtd, .dzs3-ext-fla, .dzs3-ext-h, .dzs3-ext-java, .dzs3-ext-lua, .dzs3-ext-m, .dzs3-ext-pl, .dzs3-ext-py, .dzs3-ext-sh, .dzs3-ext-sln, .dzs3-ext-swift, .dzs3-ext-vcxproj, .dzs3-ext-xcodeproj, .dzs3-ext-asp, .dzs3-ext-aspx, .dzs3-ext-cer, .dzs3-ext-cfm, .dzs3-ext-csr, .dzs3-ext-css, .dzs3-ext-htm, .dzs3-ext-html, .dzs3-ext-js, .dzs3-ext-jsp, .dzs3-ext-php, .dzs3-ext-rss, .dzs3-ext-xhtml {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/Dev File.svg');
+  }
+  .dzs3-ext-des, .dzs3-ext-iif, .dzs3-ext-nd, .dzs3-ext-qba, .dzs3-ext-qbb, .dzs3-ext-qbm, .dzs3-ext-qbr, .dzs3-ext-qbw, .dzs3-ext-qbx, .dzs3-ext-qby {
+    background-image: inline_svg_image('../assets/filetype-icons/optimized/Quickbooks.svg');
+  }
 }

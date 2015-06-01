@@ -25,7 +25,7 @@
  */
 
 (function() {
-  var AmazonXHR, S3File, Emitter, DropzoneS3, camelize, contentLoaded, detectVerticalSquash, drawImageIOSFix, noop, without, extend, param, buildParams,
+  var AmazonXHR, S3File, Emitter, DropzoneS3, camelize, contentLoaded, detectVerticalSquash, drawImageIOSFix, noop, without, extend, param, buildParams, getExtension,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) {
@@ -59,6 +59,15 @@
       }
     }
     return target;
+  };
+
+  // http://stackoverflow.com/questions/190852/how-can-i-get-file-extensions-with-javascript
+  getExtension = function(filename, fallback) {
+    var a = filename.split(".");
+    if( a.length === 1 || ( a[0] === "" && a.length === 2 ) ) {
+      return fallback;
+    }
+    return a.pop().toLowerCase();
   };
 
   AmazonXHR = (function(CryptoJS) {
@@ -981,7 +990,7 @@
         }
       },
       addedfile: function(file) {
-        var node, removeFileEvent, removeLink, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+        var node, removeFileEvent, removeLink, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _results;
         if (this.element === this.previewsContainer) {
           this.element.classList.add("dzs3-started");
         }
@@ -998,6 +1007,11 @@
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             node = _ref1[_j];
             node.innerHTML = this.filesize(file.size);
+          }
+          var fileExtension = getExtension(file.name, 'generic');
+          _ref3 = file.previewElement.querySelectorAll("[data-dzs3-thumb-container]");
+          for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+            _ref3[_j].classList.add('dzs3-ext-' + fileExtension);
           }
 
           if (this.options.addRemoveLinks) {
@@ -1161,7 +1175,7 @@
       maxfilesreached: noop,
       queuecomplete: noop,
       previewTemplate: '<div class="dzs3-preview dzs3-file-preview">' +
-        '<div class="dzs3-image"><img data-dzs3-thumbnail /></div>' +
+        '<div class="dzs3-image dzs3-ext" data-dzs3-thumb-container><img data-dzs3-thumbnail /></div>' +
         '<div class="dzs3-details">' +
         '<div class="dzs3-size"><span data-dzs3-size></span></div>' +
         '<div class="dzs3-filename"><span data-dzs3-name></span></div>' +

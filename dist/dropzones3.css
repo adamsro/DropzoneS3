@@ -9,21 +9,25 @@
     -moz-transform: translateY(40px);
     -ms-transform: translateY(40px);
     -o-transform: translateY(40px);
-    transform: translateY(40px); }
+    transform: translateY(40px);
+  }
   30%, 70% {
     opacity: 1;
     -webkit-transform: translateY(0px);
     -moz-transform: translateY(0px);
     -ms-transform: translateY(0px);
     -o-transform: translateY(0px);
-    transform: translateY(0px); }
+    transform: translateY(0px);
+  }
   100% {
     opacity: 0;
     -webkit-transform: translateY(-40px);
     -moz-transform: translateY(-40px);
     -ms-transform: translateY(-40px);
     -o-transform: translateY(-40px);
-    transform: translateY(-40px); } }
+    transform: translateY(-40px);
+  }
+}
 @-moz-keyframes passing-through {
   0% {
     opacity: 0;
@@ -31,21 +35,25 @@
     -moz-transform: translateY(40px);
     -ms-transform: translateY(40px);
     -o-transform: translateY(40px);
-    transform: translateY(40px); }
+    transform: translateY(40px);
+  }
   30%, 70% {
     opacity: 1;
     -webkit-transform: translateY(0px);
     -moz-transform: translateY(0px);
     -ms-transform: translateY(0px);
     -o-transform: translateY(0px);
-    transform: translateY(0px); }
+    transform: translateY(0px);
+  }
   100% {
     opacity: 0;
     -webkit-transform: translateY(-40px);
     -moz-transform: translateY(-40px);
     -ms-transform: translateY(-40px);
     -o-transform: translateY(-40px);
-    transform: translateY(-40px); } }
+    transform: translateY(-40px);
+  }
+}
 @keyframes passing-through {
   0% {
     opacity: 0;
@@ -53,21 +61,25 @@
     -moz-transform: translateY(40px);
     -ms-transform: translateY(40px);
     -o-transform: translateY(40px);
-    transform: translateY(40px); }
+    transform: translateY(40px);
+  }
   30%, 70% {
     opacity: 1;
     -webkit-transform: translateY(0px);
     -moz-transform: translateY(0px);
     -ms-transform: translateY(0px);
     -o-transform: translateY(0px);
-    transform: translateY(0px); }
+    transform: translateY(0px);
+  }
   100% {
     opacity: 0;
     -webkit-transform: translateY(-40px);
     -moz-transform: translateY(-40px);
     -ms-transform: translateY(-40px);
     -o-transform: translateY(-40px);
-    transform: translateY(-40px); } }
+    transform: translateY(-40px);
+  }
+}
 @-webkit-keyframes slide-in {
   0% {
     opacity: 0;
@@ -75,14 +87,17 @@
     -moz-transform: translateY(40px);
     -ms-transform: translateY(40px);
     -o-transform: translateY(40px);
-    transform: translateY(40px); }
+    transform: translateY(40px);
+  }
   30% {
     opacity: 1;
     -webkit-transform: translateY(0px);
     -moz-transform: translateY(0px);
     -ms-transform: translateY(0px);
     -o-transform: translateY(0px);
-    transform: translateY(0px); } }
+    transform: translateY(0px);
+  }
+}
 @-moz-keyframes slide-in {
   0% {
     opacity: 0;
@@ -90,14 +105,17 @@
     -moz-transform: translateY(40px);
     -ms-transform: translateY(40px);
     -o-transform: translateY(40px);
-    transform: translateY(40px); }
+    transform: translateY(40px);
+  }
   30% {
     opacity: 1;
     -webkit-transform: translateY(0px);
     -moz-transform: translateY(0px);
     -ms-transform: translateY(0px);
     -o-transform: translateY(0px);
-    transform: translateY(0px); } }
+    transform: translateY(0px);
+  }
+}
 @keyframes slide-in {
   0% {
     opacity: 0;
@@ -105,95 +123,129 @@
     -moz-transform: translateY(40px);
     -ms-transform: translateY(40px);
     -o-transform: translateY(40px);
-    transform: translateY(40px); }
+    transform: translateY(40px);
+  }
   30% {
     opacity: 1;
     -webkit-transform: translateY(0px);
     -moz-transform: translateY(0px);
     -ms-transform: translateY(0px);
     -o-transform: translateY(0px);
-    transform: translateY(0px); } }
+    transform: translateY(0px);
+  }
+}
 @-webkit-keyframes pulse {
   0% {
     -webkit-transform: scale(1);
     -moz-transform: scale(1);
     -ms-transform: scale(1);
     -o-transform: scale(1);
-    transform: scale(1); }
+    transform: scale(1);
+  }
   10% {
     -webkit-transform: scale(1.1);
     -moz-transform: scale(1.1);
     -ms-transform: scale(1.1);
     -o-transform: scale(1.1);
-    transform: scale(1.1); }
+    transform: scale(1.1);
+  }
   20% {
     -webkit-transform: scale(1);
     -moz-transform: scale(1);
     -ms-transform: scale(1);
     -o-transform: scale(1);
-    transform: scale(1); } }
+    transform: scale(1);
+  }
+}
 @-moz-keyframes pulse {
   0% {
     -webkit-transform: scale(1);
     -moz-transform: scale(1);
     -ms-transform: scale(1);
     -o-transform: scale(1);
-    transform: scale(1); }
+    transform: scale(1);
+  }
   10% {
     -webkit-transform: scale(1.1);
     -moz-transform: scale(1.1);
     -ms-transform: scale(1.1);
     -o-transform: scale(1.1);
-    transform: scale(1.1); }
+    transform: scale(1.1);
+  }
   20% {
     -webkit-transform: scale(1);
     -moz-transform: scale(1);
     -ms-transform: scale(1);
     -o-transform: scale(1);
-    transform: scale(1); } }
+    transform: scale(1);
+  }
+}
 @keyframes pulse {
   0% {
     -webkit-transform: scale(1);
     -moz-transform: scale(1);
     -ms-transform: scale(1);
     -o-transform: scale(1);
-    transform: scale(1); }
+    transform: scale(1);
+  }
   10% {
     -webkit-transform: scale(1.1);
     -moz-transform: scale(1.1);
     -ms-transform: scale(1.1);
     -o-transform: scale(1.1);
-    transform: scale(1.1); }
+    transform: scale(1.1);
+  }
   20% {
     -webkit-transform: scale(1);
     -moz-transform: scale(1);
     -ms-transform: scale(1);
     -o-transform: scale(1);
-    transform: scale(1); } }
+    transform: scale(1);
+  }
+}
+/* line 97, ../src/dropzones3.scss */
 .dzs3, .dzs3 * {
-  box-sizing: border-box; }
+  box-sizing: border-box;
+}
 
+/* line 100, ../src/dropzones3.scss */
 .dzs3 {
   min-height: 150px;
   border: 2px solid rgba(0, 0, 0, 0.3);
   background: white;
-  padding: 20px 20px; }
-  .dzs3.dzs3-clickable {
-    cursor: pointer; }
-    .dzs3.dzs3-clickable * {
-      cursor: default; }
-    .dzs3.dzs3-clickable .dzs3-message, .dzs3.dzs3-clickable .dzs3-message * {
-      cursor: pointer; }
-  .dzs3.dzs3-started .dzs3-message {
-    display: none; }
-  .dzs3.dzs3-drag-hover {
-    border-style: solid; }
-    .dzs3.dzs3-drag-hover .dzs3-message {
-      opacity: 0.5; }
-  .dzs3 .dzs3-message {
-    text-align: center;
-    margin: 2em 0; }
+  padding: 20px 20px;
+}
+/* line 102, ../src/dropzones3.scss */
+.dzs3.dzs3-clickable {
+  cursor: pointer;
+}
+/* line 105, ../src/dropzones3.scss */
+.dzs3.dzs3-clickable * {
+  cursor: default;
+}
+/* line 109, ../src/dropzones3.scss */
+.dzs3.dzs3-clickable .dzs3-message, .dzs3.dzs3-clickable .dzs3-message * {
+  cursor: pointer;
+}
+/* line 121, ../src/dropzones3.scss */
+.dzs3.dzs3-started .dzs3-message {
+  display: none;
+}
+/* line 126, ../src/dropzones3.scss */
+.dzs3.dzs3-drag-hover {
+  border-style: solid;
+}
+/* line 128, ../src/dropzones3.scss */
+.dzs3.dzs3-drag-hover .dzs3-message {
+  opacity: 0.5;
+}
+/* line 132, ../src/dropzones3.scss */
+.dzs3 .dzs3-message {
+  text-align: center;
+  margin: 2em 0;
+}
 
+/* line 138, ../src/dropzones3.scss */
 .dzs3-preview {
   position: relative;
   display: inline-block;
@@ -202,216 +254,349 @@
   min-height: 100px;
   -moz-transition: -moz-transform 0.5s ease-in-out;
   -webkit-transition: -webkit-transform 0.5s ease-in-out;
-  -o-transition: -o-transform 0.5s ease-in-out; }
-  .dzs3-preview:hover {
-    z-index: 1000; }
-    .dzs3-preview:hover .dzs3-details {
-      opacity: 1; }
-  .dzs3-preview.dzs3-file-preview .dzs3-image {
-    border-radius: 20px;
-    background: #999;
-    background: linear-gradient(to bottom, #eee, #ddd); }
-  .dzs3-preview.dzs3-file-preview .dzs3-details {
-    opacity: 1; }
-  .dzs3-preview.dzs3-image-preview {
-    background: white; }
-    .dzs3-preview.dzs3-image-preview .dzs3-details {
-      -webkit-transition: opacity 0.2s linear;
-      -moz-transition: opacity 0.2s linear;
-      -ms-transition: opacity 0.2s linear;
-      -o-transition: opacity 0.2s linear;
-      transition: opacity 0.2s linear; }
-  .dzs3-preview .dzs3-remove {
-    font-size: 14px;
-    text-align: center;
-    display: block;
-    cursor: pointer;
-    border: none; }
-    .dzs3-preview .dzs3-remove:hover {
-      text-decoration: underline; }
-  .dzs3-preview:hover .dzs3-details {
-    opacity: 1; }
-  .dzs3-preview .dzs3-details {
-    z-index: 20;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    font-size: 13px;
-    min-width: 100%;
-    max-width: 100%;
-    padding: 1.5em 1em;
-    text-align: center;
-    color: rgba(0, 0, 0, 0.9);
-    line-height: 150%; }
-    .dzs3-preview .dzs3-details .dzs3-size {
-      margin-bottom: 1em;
-      font-size: 16px; }
-    .dzs3-preview .dzs3-details .dzs3-filename {
-      white-space: nowrap; }
-      .dzs3-preview .dzs3-details .dzs3-filename:hover span {
-        border: 1px solid rgba(200, 200, 200, 0.8);
-        background-color: rgba(255, 255, 255, 0.8); }
-      .dzs3-preview .dzs3-details .dzs3-filename:not(:hover) {
-        overflow: hidden;
-        text-overflow: ellipsis; }
-        .dzs3-preview .dzs3-details .dzs3-filename:not(:hover) span {
-          border: 1px solid transparent; }
-    .dzs3-preview .dzs3-details .dzs3-filename span, .dzs3-preview .dzs3-details .dzs3-size span {
-      background-color: rgba(255, 255, 255, 0.4);
-      padding: 0 0.4em;
-      border-radius: 3px; }
-  .dzs3-preview:hover .dzs3-image img {
-    -webkit-transform: scale(1.05, 1.05);
-    -moz-transform: scale(1.05, 1.05);
-    -ms-transform: scale(1.05, 1.05);
-    -o-transform: scale(1.05, 1.05);
-    transform: scale(1.05, 1.05);
-    -webkit-filter: blur(8px);
-    filter: blur(8px); }
-  .dzs3-preview .dzs3-image {
-    border-radius: 20px;
-    overflow: hidden;
-    width: 120px;
-    height: 120px;
-    position: relative;
-    display: block;
-    z-index: 10; }
-    .dzs3-preview .dzs3-image img {
-      display: block; }
-  .dzs3-preview.dzs3-success .dzs3-success-mark {
-    -webkit-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
-    -moz-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
-    -ms-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
-    -o-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
-    animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1); }
-  .dzs3-preview.dzs3-error .dzs3-error-mark {
-    opacity: 1;
-    -webkit-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
-    -moz-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
-    -ms-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
-    -o-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
-    animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1); }
-  .dzs3-preview.dzs3-paused .dzs3-resume-mark {
-    opacity: 1;
-    -webkit-transition: opacity 0.4s ease-in-out;
-    -moz-transition: opacity 0.4s ease-in-out;
-    -ms-transition: opacity 0.4s ease-in-out;
-    -o-transition: opacity 0.4s ease-in-out;
-    transition: opacity 0.4s ease-in-out; }
-  .dzs3-preview .dzs3-success-mark, .dzs3-preview .dzs3-error-mark, .dzs3-preview .dzs3-resume-mark {
-    pointer-events: none;
-    opacity: 0;
-    z-index: 500;
-    position: absolute;
-    display: block;
-    top: 50%;
-    left: 50%;
-    margin-left: -27px;
-    margin-top: -27px; }
-    .dzs3-preview .dzs3-success-mark svg, .dzs3-preview .dzs3-error-mark svg, .dzs3-preview .dzs3-resume-mark svg {
-      display: block;
-      width: 54px;
-      height: 54px; }
-  .dzs3-preview .dzs3-resume-mark {
-    margin-top: -54px; }
-  .dzs3-preview.dzs3-processing .dzs3-progress {
-    opacity: 1;
-    -webkit-transition: all 0.2s linear;
-    -moz-transition: all 0.2s linear;
-    -ms-transition: all 0.2s linear;
-    -o-transition: all 0.2s linear;
-    transition: all 0.2s linear; }
-  .dzs3-preview.dzs3-complete .dzs3-progress {
-    opacity: 0;
-    -webkit-transition: opacity 0.4s ease-in;
-    -moz-transition: opacity 0.4s ease-in;
-    -ms-transition: opacity 0.4s ease-in;
-    -o-transition: opacity 0.4s ease-in;
-    transition: opacity 0.4s ease-in; }
-  .dzs3-preview:not(.dzs3-processing) .dzs3-progress {
-    -webkit-animation: pulse 6s ease infinite;
-    -moz-animation: pulse 6s ease infinite;
-    -ms-animation: pulse 6s ease infinite;
-    -o-animation: pulse 6s ease infinite;
-    animation: pulse 6s ease infinite; }
-  .dzs3-preview .dzs3-progress {
-    opacity: 1;
-    z-index: 1000;
-    pointer-events: none;
-    position: absolute;
-    height: 16px;
-    left: 50%;
-    top: 70%;
-    margin-top: -8px;
-    width: 80px;
-    margin-left: -40px;
-    background: rgba(255, 255, 255, 0.9);
-    -webkit-transform: scale(1);
-    border-radius: 8px;
-    overflow: hidden; }
-    .dzs3-preview .dzs3-progress .dzs3-upload {
-      background: #333;
-      background: linear-gradient(to bottom, #666, #444);
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 0;
-      -webkit-transition: width 300ms ease-in-out;
-      -moz-transition: width 300ms ease-in-out;
-      -ms-transition: width 300ms ease-in-out;
-      -o-transition: width 300ms ease-in-out;
-      transition: width 300ms ease-in-out; }
-  .dzs3-preview.dzs3-error .dzs3-error-message {
-    display: block; }
-  .dzs3-preview.dzs3-error:hover .dzs3-error-message {
-    opacity: 1;
-    pointer-events: auto; }
-  .dzs3-preview.dzs3-paused .dzs3-pause-message {
-    display: block; }
-  .dzs3-preview.dzs3-paused:hover .dzs3-pause-message {
-    opacity: 1; }
-  .dzs3-preview .dzs3-error-message, .dzs3-preview .dzs3-pause-message {
-    pointer-events: none;
-    z-index: 1000;
-    position: absolute;
-    display: block;
-    display: none;
-    opacity: 0;
-    -webkit-transition: opacity 0.3s ease;
-    -moz-transition: opacity 0.3s ease;
-    -ms-transition: opacity 0.3s ease;
-    -o-transition: opacity 0.3s ease;
-    transition: opacity 0.3s ease;
-    border-radius: 8px;
-    font-size: 13px;
-    top: 130px;
-    left: -10px;
-    width: 140px;
-    background: #be2626;
-    background: linear-gradient(to bottom, #be2626, #a92222);
-    padding: 0.5em 1.2em;
-    color: white;
-    text-align: center; }
-    .dzs3-preview .dzs3-error-message:after, .dzs3-preview .dzs3-pause-message:after {
-      content: '';
-      position: absolute;
-      top: -6px;
-      left: 64px;
-      width: 0;
-      height: 0;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      border-bottom: 6px solid #be2626; }
-  .dzs3-preview .dzs3-pause-message {
-    background: #fda53a;
-    background: linear-gradient(to bottom, #fda53a, #fd9921); }
-    .dzs3-preview .dzs3-pause-message:after {
-      border-bottom: 6px solid #fda53a; }
-  .dzs3-preview.dzs3-duplicate-attempt {
-    -webkit-transform: scale(1.2);
-    -moz-transform: scale(1.2);
-    -ms-transform: scale(1.2);
-    -o-transform: scale(1.2);
-    transform: scale(1.2); }
+  -o-transition: -o-transform 0.5s ease-in-out;
+}
+/* line 151, ../src/dropzones3.scss */
+.dzs3-preview:hover {
+  z-index: 1000;
+}
+/* line 154, ../src/dropzones3.scss */
+.dzs3-preview:hover .dzs3-details {
+  opacity: 1;
+}
+/* line 160, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-file-preview .dzs3-details {
+  opacity: 1;
+}
+/* line 165, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-image-preview {
+  background: white;
+  border-radius: 20px;
+}
+/* line 168, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-image-preview .dzs3-details {
+  -webkit-transition: opacity 0.2s linear;
+  -moz-transition: opacity 0.2s linear;
+  -ms-transition: opacity 0.2s linear;
+  -o-transition: opacity 0.2s linear;
+  transition: opacity 0.2s linear;
+}
+/* line 171, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-image-preview .dzs3-image {
+  border-radius: 20px;
+}
+/* line 176, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-remove {
+  font-size: 14px;
+  text-align: center;
+  display: block;
+  cursor: pointer;
+  border: none;
+}
+/* line 182, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-remove:hover {
+  text-decoration: underline;
+}
+/* line 187, ../src/dropzones3.scss */
+.dzs3-preview:hover .dzs3-details {
+  opacity: 1;
+}
+/* line 190, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-details {
+  z-index: 20;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  font-size: 13px;
+  min-width: 100%;
+  max-width: 100%;
+  padding: 1.5em 1em;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.9);
+  line-height: 150%;
+}
+/* line 212, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-details .dzs3-size {
+  margin-bottom: 1em;
+  font-size: 16px;
+}
+/* line 217, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-details .dzs3-filename {
+  white-space: nowrap;
+}
+/* line 222, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-details .dzs3-filename:hover span {
+  border: 1px solid rgba(200, 200, 200, 0.8);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+/* line 227, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-details .dzs3-filename:not(:hover) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* line 228, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-details .dzs3-filename:not(:hover) span {
+  border: 1px solid transparent;
+}
+/* line 238, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-details .dzs3-filename span, .dzs3-preview .dzs3-details .dzs3-size span {
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 0 0.4em;
+  border-radius: 3px;
+}
+/* line 250, ../src/dropzones3.scss */
+.dzs3-preview:hover .dzs3-image img {
+  -webkit-transform: scale(1.05, 1.05);
+  -moz-transform: scale(1.05, 1.05);
+  -ms-transform: scale(1.05, 1.05);
+  -o-transform: scale(1.05, 1.05);
+  transform: scale(1.05, 1.05);
+  -webkit-filter: blur(8px);
+  filter: blur(8px);
+}
+/* line 256, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-image {
+  overflow: hidden;
+  width: 120px;
+  height: 120px;
+  position: relative;
+  display: block;
+  z-index: 10;
+}
+/* line 264, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-image img {
+  display: block;
+}
+/* line 271, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-success .dzs3-success-mark {
+  -webkit-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
+  -moz-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
+  -ms-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
+  -o-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
+  animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);
+}
+/* line 276, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-error .dzs3-error-mark {
+  opacity: 1;
+  -webkit-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
+  -moz-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
+  -ms-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
+  -o-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
+  animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);
+}
+/* line 283, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-paused .dzs3-resume-mark {
+  opacity: 1;
+  -webkit-transition: opacity 0.4s ease-in-out;
+  -moz-transition: opacity 0.4s ease-in-out;
+  -ms-transition: opacity 0.4s ease-in-out;
+  -o-transition: opacity 0.4s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
+}
+/* line 292, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-success-mark, .dzs3-preview .dzs3-error-mark, .dzs3-preview .dzs3-resume-mark {
+  pointer-events: none;
+  opacity: 0;
+  z-index: 500;
+  position: absolute;
+  display: block;
+  top: 50%;
+  left: 50%;
+  margin-left: -27px;
+  margin-top: -27px;
+}
+/* line 307, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-success-mark svg, .dzs3-preview .dzs3-error-mark svg, .dzs3-preview .dzs3-resume-mark svg {
+  display: block;
+  width: 54px;
+  height: 54px;
+}
+/* line 314, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-resume-mark {
+  margin-top: -54px;
+}
+/* line 318, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-processing .dzs3-progress {
+  opacity: 1;
+  -webkit-transition: all 0.2s linear;
+  -moz-transition: all 0.2s linear;
+  -ms-transition: all 0.2s linear;
+  -o-transition: all 0.2s linear;
+  transition: all 0.2s linear;
+}
+/* line 322, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-complete .dzs3-progress {
+  opacity: 0;
+  -webkit-transition: opacity 0.4s ease-in;
+  -moz-transition: opacity 0.4s ease-in;
+  -ms-transition: opacity 0.4s ease-in;
+  -o-transition: opacity 0.4s ease-in;
+  transition: opacity 0.4s ease-in;
+}
+/* line 328, ../src/dropzones3.scss */
+.dzs3-preview:not(.dzs3-processing) .dzs3-progress {
+  -webkit-animation: pulse 6s ease infinite;
+  -moz-animation: pulse 6s ease infinite;
+  -ms-animation: pulse 6s ease infinite;
+  -o-animation: pulse 6s ease infinite;
+  animation: pulse 6s ease infinite;
+}
+/* line 332, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-progress {
+  opacity: 1;
+  z-index: 1000;
+  pointer-events: none;
+  position: absolute;
+  height: 16px;
+  left: 50%;
+  top: 70%;
+  margin-top: -8px;
+  width: 80px;
+  margin-left: -40px;
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-transform: scale(1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+/* line 358, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-progress .dzs3-upload {
+  background: #333;
+  background: linear-gradient(to bottom, #666, #444);
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  -webkit-transition: width 300ms ease-in-out;
+  -moz-transition: width 300ms ease-in-out;
+  -ms-transition: width 300ms ease-in-out;
+  -o-transition: width 300ms ease-in-out;
+  transition: width 300ms ease-in-out;
+}
+/* line 372, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-error .dzs3-error-message {
+  display: block;
+}
+/* line 375, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-error:hover .dzs3-error-message {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* line 381, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-paused .dzs3-pause-message {
+  display: block;
+}
+/* line 384, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-paused:hover .dzs3-pause-message {
+  opacity: 1;
+}
+/* line 389, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-error-message, .dzs3-preview .dzs3-pause-message {
+  pointer-events: none;
+  z-index: 1000;
+  position: absolute;
+  display: block;
+  display: none;
+  opacity: 0;
+  -webkit-transition: opacity 0.3s ease;
+  -moz-transition: opacity 0.3s ease;
+  -ms-transition: opacity 0.3s ease;
+  -o-transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease;
+  border-radius: 8px;
+  font-size: 13px;
+  top: 130px;
+  left: -10px;
+  width: 140px;
+  background: #be2626;
+  background: linear-gradient(to bottom, #be2626, #a92222);
+  padding: 0.5em 1.2em;
+  color: white;
+  text-align: center;
+}
+/* line 412, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-error-message:after, .dzs3-preview .dzs3-pause-message:after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 64px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #be2626;
+}
+/* line 425, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-pause-message {
+  background: #fda53a;
+  background: linear-gradient(to bottom, #fda53a, #fd9921);
+}
+/* line 430, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-pause-message:after {
+  border-bottom: 6px solid #fda53a;
+}
+/* line 435, ../src/dropzones3.scss */
+.dzs3-preview.dzs3-duplicate-attempt {
+  -webkit-transform: scale(1.2);
+  -moz-transform: scale(1.2);
+  -ms-transform: scale(1.2);
+  -o-transform: scale(1.2);
+  transform: scale(1.2);
+}
+
+/* line 442, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%230091ff%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22uploadsvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.083V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M45.995%2064.165L45.99%2090.16c-.003%202.124%201.762%203.85%203.934%203.85%202.176%200%203.934-1.72%203.936-3.85-.002-6.806.007-25.973.007-25.973s1.33%201.286%207.397%207.22c1.534%201.503%204.027%201.506%205.564%200%201.537-1.504%201.535-3.942%200-5.444L52.71%2052.147c-1.534-1.502-4.024-1.502-5.562.002l-14.002%2013.7c-1.536%201.507-1.536%203.944%200%205.446%201.535%201.504%204.026%201.504%205.563%200%204.918-4.815%207.285-7.13%207.285-7.13z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* line 448, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-txt, .dzs3-file-preview .dzs3-ext-log, .dzs3-file-preview .dzs3-ext-tex, .dzs3-file-preview .dzs3-ext-fnt, .dzs3-file-preview .dzs3-ext-fon, .dzs3-file-preview .dzs3-ext-otf, .dzs3-file-preview .dzs3-ext-ttf {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22101%22%20height%3D%22139%22%20viewBox%3D%220%200%20101%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%23ffd300%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22text-filesvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4.014-.005H67.3L100.348%2033v101.68c0%202.204-1.797%203.99-4.013%203.99H4.015c-2.218%200-4.015-1.786-4.015-3.99V3.985C0%201.78%201.797-.005%204.014-.005z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67.233%2028.927V-.146l33.096%2033.064H71.246%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M61.875%20103.934v-2.44c-5.86%200-8.788-2.496-8.788-7.487V56.494c0-1.844%201.35-2.767%204.05-2.767%207.99%200%2012.308%204.34%2012.957%2013.02l2.197-.326V49.415c-1.248.163-2.468.3-3.66.407-1.195.11-2.36.164-3.5.164H33.8c-1.03%200-2.102-.054-3.213-.163-1.112-.107-2.292-.243-3.54-.406L24.85%2066.747l2.523.65c1.085-4.664%202.74-8.15%204.964-10.456%202.224-2.304%205.126-3.457%208.707-3.457%202.657%200%203.987%201.004%203.987%203.01v37.514c0%204.99-2.902%207.486-8.706%207.486v2.44h25.55z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 451, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-doc, .dzs3-file-preview .dzs3-ext-docx, .dzs3-file-preview .dzs3-ext-gdoc, .dzs3-file-preview .dzs3-ext-msg, .dzs3-file-preview .dzs3-ext-odt, .dzs3-file-preview .dzs3-ext-pages, .dzs3-file-preview .dzs3-ext-rtf, .dzs3-file-preview .dzs3-ext-wpd, .dzs3-file-preview .dzs3-ext-wps {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%2361d1f2%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22document-filesvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.083V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M18%2096v-5h64v5H18zm0-17h64v5H18v-5zm0-13h64v5H18v-5zm0-12h64v5H18v-5zm19-12h26v5H37v-5zm7%2066H18v-5h26v5z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 454, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-pdf {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22101%22%20height%3D%22139%22%20viewBox%3D%220%200%20101%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%23ff543d%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22pdfsvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4.014-.005H67.3L100.348%2033v101.68c0%202.204-1.797%203.99-4.013%203.99H4.015c-2.218%200-4.015-1.786-4.015-3.99V3.985C0%201.78%201.797-.005%204.014-.005z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67.233%2028.927V-.146l33.096%2033.064H71.246%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M27.894%20105.656c-.814%200-1.598-.27-2.263-.78-2.435-1.87-2.76-3.95-2.606-5.37.425-3.895%205.133-7.974%2013.997-12.13%203.52-7.89%206.865-17.61%208.86-25.733-2.333-5.2-4.6-11.945-2.947-15.902.578-1.385%201.597-2.36%202.945-2.82.533-.183%201.056-.276%201.55-.276%201.18%200%202.233.528%202.968%201.485.69.9%202.767%203.61-.36%2017.084%203.153%206.664%207.62%2013.452%2011.9%2018.102%203.066-.57%205.705-.858%207.854-.858%203.663%200%205.882.875%206.787%202.672.748%201.49.442%203.23-.913%205.17-1.303%201.867-3.098%202.852-5.192%202.852-2.846%200-6.156-1.84-9.85-5.47-6.638%201.42-14.387%203.952-20.648%206.755-1.956%204.248-3.83%207.668-5.573%2010.175-2.393%203.44-4.46%205.044-6.506%205.044zm6.224-12.268c-5%202.874-7.036%205.236-7.182%206.568-.024.218-.086.798%201.008%201.657.35-.113%202.384-1.063%206.174-8.225zm31.516-10.585c1.905%201.5%203.59%202.32%204.838%202.32.548%200%201.268-.132%201.99-1.165.348-.5.483-.82.535-.992-.286-.156-1.128-.478-3.207-.478-1.18%200-2.584.107-4.156.315zM48.54%2066.997c-1.672%205.922-3.88%2012.317-6.252%2018.107%204.886-1.94%2010.202-3.635%2015.193-4.836-3.156-3.752-6.31-8.44-8.94-13.27zm-1.19-20.314c-.054.008-.127.025-.227.06-.23.078-.414.206-.57.583-.602%201.44-.126%204.175.794%207.116.763-5.067.36-7.218.002-7.76z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 457, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-pps, .dzs3-file-preview .dzs3-ext-ppt, .dzs3-file-preview .dzs3-ext-pptx, .dzs3-file-preview .dzs3-ext-key {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%23ff543d%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22presentationsvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.084V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M54%20111v3h-8v-3H16v-3h68v3H54zm20-39.047L53%2072V51c11.65%200%2021%209.38%2021%2020.953zM48.094%2097C36.444%2097%2027%2087.62%2027%2076.048c0-11.587%209.446-21.24%2021.095-21.162.34.003.57.098.905.114v21h20c0%2011.572-9.256%2021-20.906%2021zM16%2039h68v3H16v-3z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 460, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-csv, .dzs3-file-preview .dzs3-ext-gsheet, .dzs3-file-preview .dzs3-ext-xlr, .dzs3-file-preview .dzs3-ext-xls, .dzs3-file-preview .dzs3-ext-xlxs {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%232db965%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22spread-sheetsvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.084V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M19%20111V93.857v-2.57-14.29-2.854V60v-3-16.714h62V111H19zm17-68H22v14h14V43zm0%2017H22v14h14V60zm0%2017H22v14h14V77zm0%2017H22v14h14V94zm42-51H39v14h39V43zm0%2017H39v14h39V60zm0%2017H39v14h39V77zm0%2017H39v14h39V94z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 463, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-bmp, .dzs3-file-preview .dzs3-ext-dds, .dzs3-file-preview .dzs3-ext-gif, .dzs3-file-preview .dzs3-ext-jpg, .dzs3-file-preview .dzs3-ext-png, .dzs3-file-preview .dzs3-ext-psd, .dzs3-file-preview .dzs3-ext-pspimage, .dzs3-file-preview .dzs3-ext-tga, .dzs3-file-preview .dzs3-ext-thm, .dzs3-file-preview .dzs3-ext-tif, .dzs3-file-preview .dzs3-ext-tiff, .dzs3-file-preview .dzs3-ext-yuv {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%230091ff%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22image%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.083V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M86.443%2092.478c-.348.348-.805.522-1.26.522-.458%200-.914-.174-1.262-.522L65.56%2074.13l-13.01%2013c-.697.696-1.826.696-2.523%200-.697-.696-.697-1.824%200-2.52l4.144-4.14-17.26-18.816-21.877%2020.178c-.343.316-.777.472-1.21.472-.48%200-.96-.193-1.31-.573-.67-.722-.624-1.85.1-2.518l23.19-21.392c.35-.32.797-.48%201.286-.47.473.02.92.227%201.24.576l18.365%2020.02%207.602-7.598c.697-.696%201.825-.696%202.522%200l19.623%2019.61c.697.695.697%201.823%200%202.52zM57.497%2069.015c-5.256%200-9.515-4.257-9.515-9.508%200-5.25%204.26-9.507%209.515-9.507%205.256%200%209.515%204.257%209.515%209.507s-4.26%209.508-9.515%209.508zM57.5%2054c-3.038%200-5.5%202.463-5.5%205.5%200%203.038%202.462%205.5%205.5%205.5s5.5-2.462%205.5-5.5c0-3.037-2.462-5.5-5.5-5.5z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 466, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-aif, .dzs3-file-preview .dzs3-ext-iff, .dzs3-file-preview .dzs3-ext-m3u, .dzs3-file-preview .dzs3-ext-m4a, .dzs3-file-preview .dzs3-ext-mid, .dzs3-file-preview .dzs3-ext-mp3, .dzs3-file-preview .dzs3-ext-mpa, .dzs3-file-preview .dzs3-ext-ra, .dzs3-file-preview .dzs3-ext-wav, .dzs3-file-preview .dzs3-ext-wma {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%23ff6469%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22musicsvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.083V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M76.32%2051.065c-6.058-5.65-12.94-5.227-15.327-4.866l-.062%2039.694c.13.603.22%201.212.22%201.827%200%206.226-6.764%2011.29-15.08%2011.29-8.314%200-15.08-5.064-15.08-11.29%200-6.222%206.766-11.287%2015.08-11.287%205.093%200%209.18%201.555%2011.93%204.567V44l1.402-.524c.413-.11%2010.16-2.623%2018.607%205.348l-1.69%202.24z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 469, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-ai, .dzs3-file-preview .dzs3-ext-eps, .dzs3-file-preview .dzs3-ext-ps, .dzs3-file-preview .dzs3-ext-svg {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22101%22%20height%3D%22139%22%20viewBox%3D%220%200%20101%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%23ffa500%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22vectorsvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4.014-.005H67.3L100.348%2033v101.68c0%202.204-1.797%203.99-4.013%203.99H4.015c-2.218%200-4.015-1.786-4.015-3.99V3.985C0%201.78%201.797-.005%204.014-.005z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67.233%2028.927V-.146l33.096%2033.064H71.246%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M67.76%2063.03c-.098%200-.19-.015-.286-.027l-10.506%2019.59-17.664%204.056L34%2078.467l9.414-15.366L65.566%2060.4c.21-.996%201.112-1.747%202.194-1.747%201.237%200%202.24.98%202.24%202.19s-1.003%202.188-2.24%202.188zm-16.243%206.024c-2.594-1.496-5.912-.61-7.41%201.98-1.497%202.592-.608%205.903%201.986%207.4%202.594%201.494%205.91.606%207.41-1.984.736-1.273.89-2.72.553-4.04l12.8-9.568c-.72-.312-1.23-.982-1.313-1.778L52.628%2069.93c-.33-.328-.688-.633-1.11-.876z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3Cpath%20d%3D%22M72.71%2062.273c2.695%206.115%203.287%2012.932%201.63%2019.572-1.88%207.522-6.443%2013.93-12.87%2018.222-.088.67-.376%201.32-.893%201.835-1.23%201.23-3.213%201.244-4.43.028-1.215-1.216-1.2-3.198.03-4.428%201.186-1.187%203.063-1.23%204.286-.143%205.547-3.89%209.487-9.555%2011.137-16.166%201.522-6.1.94-12.358-1.583-17.956-.954-.028-1.896-.392-2.62-1.117-1.2-1.197-1.428-2.99-.72-4.453-3.785-4.892-9.072-8.332-15.197-9.79-7.025-1.672-14.303-.54-20.56%203.153.096.91-.195%201.86-.898%202.564-1.23%201.23-3.21%201.24-4.425.027-1.214-1.213-1.202-3.194.028-4.424%201.023-1.023%202.562-1.19%203.75-.52%206.927-4.132%2015-5.402%2022.793-3.547%206.657%201.584%2012.41%205.3%2016.57%2010.574%201.417-.58%203.1-.305%204.24.836%201.524%201.522%201.505%204.002-.033%205.54-.073.073-.158.126-.236.193z%22%20id%3D%22path-4%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 472, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-3g2, .dzs3-file-preview .dzs3-ext-3gp, .dzs3-file-preview .dzs3-ext-asf, .dzs3-file-preview .dzs3-ext-asx, .dzs3-file-preview .dzs3-ext-avi, .dzs3-file-preview .dzs3-ext-flv, .dzs3-file-preview .dzs3-ext-m4v, .dzs3-file-preview .dzs3-ext-mov, .dzs3-file-preview .dzs3-ext-mp4, .dzs3-file-preview .dzs3-ext-mpg, .dzs3-file-preview .dzs3-ext-rm, .dzs3-file-preview .dzs3-ext-srt, .dzs3-file-preview .dzs3-ext-swf, .dzs3-file-preview .dzs3-ext-vob, .dzs3-file-preview .dzs3-ext-wmv {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%23ff543d%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22moviesvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.083V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M79.89%2095H20.11C17.845%2095%2016%2093.16%2016%2090.896v-43.79c0-2.263%201.844-4.105%204.11-4.105h59.78c2.266%200%204.11%201.843%204.11%204.107v43.79C84%2093.158%2082.156%2095%2079.89%2095zM23.007%2045.99H20.33c-.738%200-1.34.618-1.34%201.38v1.383h4.018V45.99zm0%205.53H18.99v2.766h4.018V51.52zm0%205.533H18.99v2.767h4.018v-2.767zm0%205.532H18.99v2.766h4.018v-2.765zm0%205.533H18.99v2.766h4.018v-2.766zm0%205.533H18.99v2.765h4.018V73.65zm0%205.533H18.99v2.766h4.018v-2.767zm0%205.532H18.99v2.768h4.018v-2.768zm0%205.532H18.99v1.384c0%20.764.602%201.384%201.34%201.384h2.678v-2.767zm2.99%202.767h48.003V45.99H26v47.024zM81.01%2047.37c0-.762-.6-1.38-1.338-1.38h-2.678v2.763h4.017V47.37zm0%204.15h-4.016v2.766h4.017V51.52zm0%205.533h-4.016v2.767h4.017v-2.767zm0%205.532h-4.016v2.766h4.017v-2.765zm0%205.533h-4.016v2.766h4.017v-2.766zm0%205.533h-4.016v2.765h4.017V73.65zm0%205.533h-4.016v2.766h4.017v-2.767zm0%205.532h-4.016v2.768h4.017v-2.768zm0%205.532h-4.016v2.767h2.678c.74%200%201.34-.62%201.34-1.383v-1.383zM44.02%2078.01l-.007-19.025%2015.98%209.508-15.973%209.518zm2.7-4.827l7.866-4.688-7.868-4.682.003%209.37z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 475, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-7z, .dzs3-file-preview .dzs3-ext-cbr, .dzs3-file-preview .dzs3-ext-deb, .dzs3-file-preview .dzs3-ext-gz, .dzs3-file-preview .dzs3-ext-pkg, .dzs3-file-preview .dzs3-ext-rar, .dzs3-file-preview .dzs3-ext-rpm, .dzs3-file-preview .dzs3-ext-sitx, .dzs3-file-preview .dzs3-ext-tar.gz, .dzs3-file-preview .dzs3-ext-zip, .dzs3-file-preview .dzs3-ext-zipx, .dzs3-file-preview .dzs3-ext-bin, .dzs3-file-preview .dzs3-ext-cue, .dzs3-file-preview .dzs3-ext-dmg, .dzs3-file-preview .dzs3-ext-iso, .dzs3-file-preview .dzs3-ext-mdf, .dzs3-file-preview .dzs3-ext-toast, .dzs3-file-preview .dzs3-ext-vcd, .dzs3-file-preview .dzs3-ext-tar {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%23363a56%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.3%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%20.cls-6%20%7B%20fill%3A%20%2326283c%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22zipsvg%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.083V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cpath%20id%3D%22rect-1%22%20class%3D%22cls-5%22%20d%3D%22M47%200h6v67h-6z%22%2F%3E%3Cpath%20d%3D%22M55%2067h-5v-2h5v2zm-10-2v-2h5v2h-5zm0-6h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5v-2zm0-4h5v2h-5V7zm0-4h5v2h-5V3zm0-3h5v1h-5V0zm10%201v2h-5V1h5zm0%204v2h-5V5h5zm0%204v2h-5V9h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5zm0%204v2h-5v-2h5z%22%20id%3D%22path-3%22%20class%3D%22cls-6%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cpath%20id%3D%22rect-2%22%20class%3D%22cls-6%22%20d%3D%22M44%2067h12v16H44z%22%2F%3E%3Cpath%20d%3D%22M45%2082v-4h10v4H45zm0-14h10v9H45v-9z%22%20id%3D%22path-4%22%20class%3D%22cls-5%22%20fill-rule%3D%22evenodd%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 478, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-c, .dzs3-file-preview .dzs3-ext-class, .dzs3-file-preview .dzs3-ext-cpp, .dzs3-file-preview .dzs3-ext-cs, .dzs3-file-preview .dzs3-ext-dtd, .dzs3-file-preview .dzs3-ext-fla, .dzs3-file-preview .dzs3-ext-h, .dzs3-file-preview .dzs3-ext-java, .dzs3-file-preview .dzs3-ext-lua, .dzs3-file-preview .dzs3-ext-m, .dzs3-file-preview .dzs3-ext-pl, .dzs3-file-preview .dzs3-ext-py, .dzs3-file-preview .dzs3-ext-sh, .dzs3-file-preview .dzs3-ext-sln, .dzs3-file-preview .dzs3-ext-swift, .dzs3-file-preview .dzs3-ext-vcxproj, .dzs3-file-preview .dzs3-ext-xcodeproj, .dzs3-file-preview .dzs3-ext-asp, .dzs3-file-preview .dzs3-ext-aspx, .dzs3-file-preview .dzs3-ext-cer, .dzs3-file-preview .dzs3-ext-cfm, .dzs3-file-preview .dzs3-ext-csr, .dzs3-file-preview .dzs3-ext-css, .dzs3-file-preview .dzs3-ext-htm, .dzs3-file-preview .dzs3-ext-html, .dzs3-file-preview .dzs3-ext-js, .dzs3-file-preview .dzs3-ext-jsp, .dzs3-file-preview .dzs3-ext-php, .dzs3-file-preview .dzs3-ext-rss, .dzs3-file-preview .dzs3-ext-xhtml {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%2344486b%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.2%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22dev-filesvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.083V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M64.006%2085.05v-4.008c0-.303.075-.58.227-.83.15-.252.4-.468.75-.65l8.25-4.26c.666-.333%201.446-.607%202.34-.82-.44-.106-.852-.223-1.238-.353-.387-.13-.754-.285-1.102-.468l-8.25-4.236c-.35-.182-.6-.4-.75-.65-.152-.25-.227-.527-.227-.83v-4.01l18%209.408v2.277l-18%209.43zm-18.363%205.764c-.212.258-.455.474-.727.65-.273.173-.56.306-.864.397-.303.092-.6.138-.886.138h-2.364l13.272-34.03c.258-.637.63-1.126%201.114-1.468.485-.342%201.068-.513%201.75-.513h2.386L46.166%2089.903c-.137.35-.31.652-.523.91zm-27.635-17.47l18-9.407v4.008c0%20.304-.076.58-.228.832-.15.25-.4.467-.75.65l-8.25%204.235c-.348.183-.715.34-1.102.467-.386.13-.8.246-1.238.352.44.107.852.225%201.238.354.387.13.754.284%201.103.466l8.25%204.26c.35.182.6.398.75.65.152.25.228.527.228.83v4.01l-18-9.43v-2.278z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
+/* line 481, ../src/dropzones3.scss */
+.dzs3-file-preview .dzs3-ext-des, .dzs3-file-preview .dzs3-ext-iif, .dzs3-file-preview .dzs3-ext-nd, .dzs3-file-preview .dzs3-ext-qba, .dzs3-file-preview .dzs3-ext-qbb, .dzs3-file-preview .dzs3-ext-qbm, .dzs3-file-preview .dzs3-ext-qbr, .dzs3-file-preview .dzs3-ext-qbw, .dzs3-file-preview .dzs3-ext-qbx, .dzs3-file-preview .dzs3-ext-qby {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22101%22%20height%3D%22139%22%20viewBox%3D%220%200%20101%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%2328a038%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22quickbooks%22%3E%3Cpath%20d%3D%22M4.014.15H67.3l33.048%2033.007v101.68c0%202.203-1.797%203.99-4.013%203.99H4.015c-2.218%200-4.015-1.787-4.015-3.99V4.14C0%201.94%201.797.15%204.014.15z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cpath%20d%3D%22M67.233%2029.083V.01l33.096%2033.064H71.246%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%20fill-rule%3D%22evenodd%22%2F%3E%3Cimage%20xlink%3Ahref%3D%22data%3Aimg%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAAA1CAMAAADGWB2eAAAABGdBTUEAALGPC%2FxhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABj1BMVEUAAAD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8AAACJUNdCAAAAg3RSTlMAkAEmTml1gBQgFQgES6froO7FjEcDZtznEzDN8m9j%2BMQcf%2BYuc%2Fzw%2BfEtSnAFMlBhjc%2FlGBbs16K9AqGfP%2BRnKv6P1Ayzd%2FTvRVR5rDiU%2BzZ8vNm26oSW3m1WWWRddL6l06pTfWwXyyNAWNZGB%2F1JBm7icqPOwg9f98zDMaQkTeDHre2p5Z4AAAABYktHRACIBR1IAAAACXBIWXMAAAsSAAALEgHS3X78AAACDElEQVRIx%2B2W6VsSURTGD1RCJGokUakgqRFQkZqWKFJJubRohdBeqC22kJpbm1nnHw%2FuuTNzx5mcOX6rx%2FfLvfed8%2F6e88xyAMBRKORxLtwH%2FC8A74GDhxp8iswA%2F%2BHAkV3SjcGmZtwhM6Clth4NHWsN28XDxyNolRVQ1wnfSUv%2BVBuiawBie0ejOR%2BNIQuA2BlX86cRuQDs6jbyPYp%2FJiF01hGAyZSWT%2Bte27nu8%2BR57AAXMpmLvX16df8lqh0YlMblVqMpWwApdUUjDGWFMSyPI%2BpLsgsAIDcqI%2Fn66eo1Olz3glsAxMfIHCwYDdww5R0AEO8i9yZAYVzsJgaAA4BJciNemKLdLeAB4DbZd%2BCuWKf9XMAM2fcgJNb7wAXAA2EXYVasJT6gLOyHQA8xygc8EnZMXn7MBzyRFdTBUz7gmazY8z14Luxx%2BRRe8AEvhV3R3oMAFxCm1udgnq4vcAEZsl9p30LyNQ%2BQfUP2W31OFVlfI3SQGwJjHngY8wAW5cx8Vz%2BM0B6HXU8kmGwnc0zMNH0mvv%2FgDvDRV5WJHBmfUFNtKi85AfzLK1q57n1GQ9VEomwH6PMIra5V9dL1Jb2pBVTVYgewam1DuSubX9iAITVf%2B7X4ygNUSzv%2FJGSjEQbg23ewKpz%2BMesKEJvLwV%2Fk3fqZ7%2FFlzIBtRZVfv0vBAriQAtib9gH%2FFOAPHUhnU%2FeGEUEAAAAASUVORK5CYII%3D%22%20x%3D%2218%22%20y%3D%2249%22%20width%3D%2264%22%20height%3D%2253%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
+}
