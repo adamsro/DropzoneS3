@@ -168,9 +168,9 @@
     .dzs3-details {
       @include prefix((transition: opacity 0.2s linear));
     }
-    .dzs3-image {
-      border-radius: $image-border-radius;
-    }
+  }
+  .dzs3-image {
+    border-radius: $image-border-radius;
   }
 
   .dzs3-remove {
@@ -441,7 +441,7 @@
 .dzs3-file-preview {
   .dzs3-ext {
     background-image: inline_svg_image('../assets/filetype-icons/optimized/upload.svg');
-    background-size: contain;
+    background-size: 105%;
     background-repeat: no-repeat;
     background-position: center;
   }

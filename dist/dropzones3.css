@@ -281,8 +281,8 @@
   -o-transition: opacity 0.2s linear;
   transition: opacity 0.2s linear;
 }
-/* line 171, ../src/dropzones3.scss */
-.dzs3-preview.dzs3-image-preview .dzs3-image {
+/* line 172, ../src/dropzones3.scss */
+.dzs3-preview .dzs3-image {
   border-radius: 20px;
 }
 /* line 176, ../src/dropzones3.scss */
@@ -548,7 +548,7 @@
 /* line 442, ../src/dropzones3.scss */
 .dzs3-file-preview .dzs3-ext {
   background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20preserveAspectRatio%3D%22xMidYMid%22%20width%3D%22100%22%20height%3D%22139%22%20viewBox%3D%220%200%20100%20139%22%3E%3Cdefs%3E%3Cstyle%3E.cls-3%20%7B%20fill%3A%20%230091ff%3B%20%7D%20.cls-4%20%7B%20fill%3A%20%23000000%3B%20opacity%3A%200.1%3B%20%7D%20.cls-5%20%7B%20fill%3A%20%23ffffff%3B%20%7D%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22uploadsvg%22%20fill-rule%3D%22evenodd%22%3E%3Cpath%20d%3D%22M4%200h63.067L100%2033.083V135c0%202.21-1.79%204-4%204H4c-2.21%200-4-1.79-4-4V4c0-2.21%201.79-4%204-4z%22%20id%3D%22path-1%22%20class%3D%22cls-3%22%2F%3E%3Cpath%20d%3D%22M67%2029V-.14L99.98%2033H71%22%20id%3D%22path-2%22%20class%3D%22cls-4%22%2F%3E%3Cpath%20d%3D%22M45.995%2064.165L45.99%2090.16c-.003%202.124%201.762%203.85%203.934%203.85%202.176%200%203.934-1.72%203.936-3.85-.002-6.806.007-25.973.007-25.973s1.33%201.286%207.397%207.22c1.534%201.503%204.027%201.506%205.564%200%201.537-1.504%201.535-3.942%200-5.444L52.71%2052.147c-1.534-1.502-4.024-1.502-5.562.002l-14.002%2013.7c-1.536%201.507-1.536%203.944%200%205.446%201.535%201.504%204.026%201.504%205.563%200%204.918-4.815%207.285-7.13%207.285-7.13z%22%20id%3D%22path-3%22%20class%3D%22cls-5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
-  background-size: contain;
+  background-size: 105%;
   background-repeat: no-repeat;
   background-position: center;
 }
