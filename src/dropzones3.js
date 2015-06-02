@@ -1964,14 +1964,19 @@
         var xhr = new XMLHttpRequest();
 
         xhr.onload = function() {
-          var auth;
+          var auth = {};
           if (xhr.status / 100 == 2) {
             // Got signature, signature date, and key from server.
             try {
               auth = JSON.parse(xhr.responseText);
             } catch (ex) {
-              _this._fatalError(file, ex.message);
+              return _this._fatalError(file, ex.message);
             }
+
+            auth.region = _this.options.s3.region;
+            auth.bucket = _this.options.s3.bucket;
+            auth.access_key = _this.options.s3.accesskey;
+            auth.acl = _this.options.s3.acl;
 
             // See if file has an uploadID from a previous upload attempt and try to resume.
             if (_this.options.resuming.localStorageResume === true && _this.options.validation.allowDuplicates === false) {
@@ -1982,11 +1987,6 @@
                 auth.key = item.k;
               }
             }
-
-            auth.region = _this.options.s3.region;
-            auth.bucket = _this.options.s3.bucket;
-            auth.access_key = _this.options.s3.accesskey;
-            auth.acl = _this.options.s3.acl;
 
             _this.emit("filesigned", file, auth, function() {
               // Initiate multipart upload with Amazon.
