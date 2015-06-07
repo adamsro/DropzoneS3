@@ -1934,7 +1934,9 @@
           workerCount++;
         } else if (file.s3success && this.options.notifying.notify) {
           // Retry notifying the server of the successful upload to s3 if it failed previously.
-          this.notify(file);
+          this.emit("notify", file, function() {
+            _this._finished(file);
+          });
         } else {
           // Start PUT requests uploading chunks
           while ((chunkNum = file.upload.getNextQueuedChunk()) !== false && workerCount < this.options.chunking.maxConcurrentWorkers) {
