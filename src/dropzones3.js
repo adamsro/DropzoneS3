@@ -1154,7 +1154,47 @@
       },
       totaluploadprogress: noop,
       sending: noop,
-      notify: noop,
+      notify: function(file, done) {
+        if (this.options.notifying.notify) {
+          var _this = this, xhr = new XMLHttpRequest();
+
+          file.status = DropzoneS3.NOTIFYING;
+
+          xhr.onload = function() {
+            if (xhr.status / 100 == 2) {
+              try {
+                var item = JSON.parse(xhr.responseText);
+                file.fid = item.fid;
+                done();
+              } catch (ex) {
+                _this._fatalError(file, ex.message);
+              }
+            } else if (xhr.status / 100 == 5) {
+              // Hopefully a temporary server error
+              return _this._recoverableError(file, xhr);
+            } else {
+              return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
+            }
+          };
+          xhr.onerror = xhr.ontimeout = function(e) {
+            return _this._recoverableError(file, e.target);
+          };
+          xhr.timeout = 20000; // 20 seconds
+
+          var params = {
+            filename: file.name,
+            filesize: file.size,
+            filemime: file.type,
+            key: file.upload.auth.key
+          };
+          extend(params, this.options.notifying.params);
+          xhr.open("POST", this.options.notifying.endpoint, true);
+          xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+          xhr.send(param(params));
+        } else {
+          done();
+        }
+      },
       success: function(file) {
         if (file.previewElement) {
           return file.previewElement.classList.add("dzs3-success");
@@ -2186,11 +2226,9 @@
         return function(e) {
           file.s3success = true;
           window.localStorage.removeItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
-          if (_this.options.notifying.notify) {
-            _this.notify(file);
-          } else {
-            _this._finished(file, e.target.responseText, e);
-          }
+          _this.emit("notify", file, function() {
+            _this._finished(file);
+          });
         };
       })(this, file);
 
@@ -2216,46 +2254,6 @@
       })(this, file);
 
       file.upload.finishUpload(success_callback, parts_incomplete_callback, error_callback);
-    };
-
-    DropzoneS3.prototype.notify = function(file) {
-      var _this = this;
-      var xhr = new XMLHttpRequest();
-
-      file.status = DropzoneS3.NOTIFYING;
-
-      xhr.onload = function() {
-        if (xhr.status / 100 == 2) {
-          try {
-            var item = JSON.parse(xhr.responseText);
-            file.fid = item.fid;
-            _this._finished(file, xhr.responseText, xhr);
-          } catch (ex) {
-            _this._fatalError(file, ex.message);
-          }
-        } else if (xhr.status / 100 == 5) {
-          // Hopefully a temporary server error
-          return _this._recoverableError(file, xhr);
-        } else {
-          return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", xhr.status), xhr);
-        }
-      };
-      xhr.onerror = xhr.ontimeout = function(e) {
-        return _this._recoverableError(file, e.target);
-      };
-      xhr.timeout = 20000; // 20 seconds
-
-      var params = {
-        filename: file.name,
-        filesize: file.size,
-        filemime: file.type,
-        key: file.upload.auth.key
-      };
-      extend(params, this.options.notifying.params);
-      this.emit("notify", file, xhr, params);
-      xhr.open("POST", this.options.notifying.endpoint, true);
-      xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      xhr.send(param(params));
     };
 
     DropzoneS3.prototype._finished = function(file, responseText, e) {
