@@ -1165,7 +1165,7 @@
               try {
                 var item = JSON.parse(xhr.responseText);
                 file.fid = item.fid;
-                done();
+                done(file);
               } catch (ex) {
                 _this._fatalError(file, ex.message);
               }
@@ -1192,7 +1192,7 @@
           xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
           xhr.send(param(params));
         } else {
-          done();
+          done(file);
         }
       },
       success: function(file) {
@@ -1919,7 +1919,7 @@
     };
 
     DropzoneS3.prototype.processQueue = function() {
-      var file, chunkNum,
+      var _this = this, file, chunkNum,
         activeFiles = this.getActiveFiles(),
         workerCount = this.getWorkerCount();
 
@@ -1934,7 +1934,7 @@
           workerCount++;
         } else if (file.s3success && this.options.notifying.notify) {
           // Retry notifying the server of the successful upload to s3 if it failed previously.
-          this.emit("notify", file, function() {
+          this.emit("notify", file, function(file) {
             _this._finished(file);
           });
         } else {
@@ -2228,7 +2228,7 @@
         return function(e) {
           file.s3success = true;
           window.localStorage.removeItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
-          _this.emit("notify", file, function() {
+          _this.emit("notify", file, function(file) {
             _this._finished(file);
           });
         };
