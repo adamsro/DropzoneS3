@@ -1104,9 +1104,6 @@
         done();
       },
       pause: function(file, message) {
-        if (!this.options.resuming.automaticRetry) {
-          return false;
-        }
         var resumeFileEvent = (function(_this, file) {
           return function(e) {
             e.preventDefault();
@@ -1760,6 +1757,7 @@
     DropzoneS3.prototype.addFile = function(file) {
       var _this = this;
 
+      file.delta = this.files.length;
       file.processed = false;
       file.isDuplicate = false;
       file.s3success = false;
