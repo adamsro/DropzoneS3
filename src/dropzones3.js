@@ -833,12 +833,12 @@
         ssencrypt: false // Server side encrypt AES256
       },
       signing: {
-        endpoint: '/dropzones3/sign/',
+        endpoint: '/dropzones3/sign',
         params: {}
       },
       notifying: {
-        notify: true, // Tell server about the file on S3.
-        endpoint: '/dropzones3/finish/',
+        notify: false, // Tell server about the file on S3.
+        endpoint: '/dropzones3/notify',
         params: {}
       },
       chunking: {
@@ -2069,8 +2069,9 @@
 
         file.status = DropzoneS3.PROCESSING;
 
-        params.name = file.name;
-        params.size = file.size;
+        params.filename = file.name;
+        params.filesize = file.size;
+        params.filemime = file.type;
 
         extend(params, this.options.signing.params);
 
