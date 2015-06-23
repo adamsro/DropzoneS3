@@ -1240,6 +1240,7 @@
       this.clickableElements = [];
       this.listeners = [];
       this.files = [];
+      this.dummyFiles = []; // Used if widget will have files from a previous submission printed in it.
       if (typeof this.element === "string") {
         this.element = document.querySelector(this.element);
       }
@@ -1757,7 +1758,7 @@
     DropzoneS3.prototype.addFile = function(file) {
       var _this = this;
 
-      file.delta = this.files.length;
+      file.delta = this.files.length + this.dummyFiles.length;
       file.processed = false;
       file.isDuplicate = false;
       file.s3success = false;
@@ -1816,7 +1817,7 @@
         return done(this.options.dictFileTooBig.replace("{{filesize}}", Math.round(file.size / 1024 / 10.24) / 100).replace("{{maxFilesize}}", this.options.validation.maxFilesize));
       } else if (!DropzoneS3.isValidFile(file, this.options.validation.acceptedFiles)) {
         return done(this.options.dictInvalidFileType);
-      } else if ((this.options.validation.maxFiles != null) && this.getAcceptedFiles().length >= this.options.validation.maxFiles) {
+      } else if ((this.options.validation.maxFiles != null) && (this.getAcceptedFiles().length + this.dummyFiles.length) >= this.options.validation.maxFiles) {
         done(this.options.dictMaxFilesExceeded.replace("{{maxFiles}}", this.options.validation.maxFiles));
         return this.emit("maxfilesexceeded", file);
       } else {
