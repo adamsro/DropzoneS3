@@ -830,7 +830,8 @@
         bucket: null,
         accesskey: null,
         acl: "private",
-        ssencrypt: false // Server side encrypt AES256
+        ssencrypt: false, // Server side encrypt AES256
+        abortOnCancel: false
       },
       signing: {
         endpoint: '/dropzones3/sign',
@@ -2176,18 +2177,20 @@
 
     DropzoneS3.prototype.cancelUpload = function(file) {
       var _this = this;
-      // Abort all sending requests and send an abort request to Amazon to deallocate space
-      file.upload.abort(noop, (function(_this, file) {
-        return function(e) {
-          // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
-          var recoverableResponseCodes = [0, 500, 503];
-          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseText.indexOf('RequestTimeout') !== -1)) {
-            return _this._recoverableError(file, e.target);
-          } else {
-            return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
-          }
-        };
-      })(this, file));
+      if (this.options.abortOnCancel) {
+        // Abort all sending requests and send an abort request to Amazon to deallocate space
+        file.upload.abort(noop, (function(_this, file) {
+          return function(e) {
+            // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
+            var recoverableResponseCodes = [0, 500, 503];
+            if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseText.indexOf('RequestTimeout') !== -1)) {
+              return _this._recoverableError(file, e.target);
+            } else {
+              return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+            }
+          };
+        })(this, file));
+      }
       file.status = DropzoneS3.CANCELED;
       this.emit("canceled", file);
 
