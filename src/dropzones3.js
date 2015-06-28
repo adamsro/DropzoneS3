@@ -869,7 +869,7 @@
       ignoreHiddenFiles: true,
       filesizeBase: 1000,
       autoQueue: true,
-      addRemoveLinks: true,
+      addRemoveLinks: false,
       previewsContainer: null,
       capture: null,
       dictDefaultMessage: "Drop files here to upload",
@@ -1922,20 +1922,27 @@
         activeFiles = this.getActiveFiles(),
         workerCount = this.getWorkerCount();
 
+      // First try to complete any unfinished uploads.
+      while ((file = activeFiles.shift())) {
+        if (file.processed && !file.s3success && file.upload.chunksSuccessful()) {
+          // Tell amazon to complete the upload
+          this.finishUpload(file);
+          workerCount++;
+        } else if (file.processed && file.s3success && this.options.notifying.notify) {
+          // File status is Uploading or Queued put s3 notify was successful.
+          // Retry notifying the server of the successful upload to s3 if it failed previously.
+          this.emit("notify", file, function(file) {
+            _this._finished(file);
+          });
+        }
+      }
+      // Init and send chunks.
+      activeFiles = this.getActiveFiles();
       while ((file = activeFiles.shift()) && workerCount < this.options.chunking.maxConcurrentWorkers) {
         if (file.status == DropzoneS3.QUEUED && file.processed === false) {
           // Initiate the multipart upload
           this.sign(file);
           workerCount++;
-        } else if (!file.s3success && file.upload.chunksSuccessful()) {
-          // Tell amazon to complete the upload
-          this.finishUpload(file);
-          workerCount++;
-        } else if (file.s3success && this.options.notifying.notify) {
-          // Retry notifying the server of the successful upload to s3 if it failed previously.
-          this.emit("notify", file, function(file) {
-            _this._finished(file);
-          });
         } else {
           // Start PUT requests uploading chunks
           while ((chunkNum = file.upload.getNextQueuedChunk()) !== false && workerCount < this.options.chunking.maxConcurrentWorkers) {
