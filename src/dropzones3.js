@@ -662,7 +662,7 @@
       this.chunks = [];
     };
 
-    S3File.prototype.abort = function(success_callback, error_callback) {
+    S3File.prototype.abort = function(success_callback, error_callback, sendDeleteRequest) {
       for (var i = this.chunks.length - 1; i >= 0; i--) {
         if (this.chunks[i].hasOwnProperty('xhr')) {
           this.chunks[i].xhr.abort();
@@ -2177,20 +2177,18 @@
 
     DropzoneS3.prototype.cancelUpload = function(file) {
       var _this = this;
-      if (this.options.abortOnCancel) {
-        // Abort all sending requests and send an abort request to Amazon to deallocate space
-        file.upload.abort(noop, (function(_this, file) {
-          return function(e) {
-            // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
-            var recoverableResponseCodes = [0, 500, 503];
-            if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseText.indexOf('RequestTimeout') !== -1)) {
-              return _this._recoverableError(file, e.target);
-            } else {
-              return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
-            }
-          };
-        })(this, file));
-      }
+      // Abort all sending requests and send an abort request to Amazon to deallocate space
+      file.upload.abort(noop, (function(_this, file) {
+        return function(e) {
+          // http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
+          var recoverableResponseCodes = [0, 500, 503];
+          if (recoverableResponseCodes.indexOf(e.target.status) != -1 || (e.target.status == 400 && e.target.responseText.indexOf('RequestTimeout') !== -1)) {
+            return _this._recoverableError(file, e.target);
+          } else {
+            return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
+          }
+        };
+      })(this, file), this.options.abortOnCancel);
       file.status = DropzoneS3.CANCELED;
       this.emit("canceled", file);
 
