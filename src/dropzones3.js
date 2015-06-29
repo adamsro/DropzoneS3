@@ -662,13 +662,15 @@
       this.chunks = [];
     };
 
-    S3File.prototype.abort = function(success_callback, error_callback, sendDeleteRequest) {
+    S3File.prototype.abort = function(success_callback, error_callback, abortOnCancel) {
       for (var i = this.chunks.length - 1; i >= 0; i--) {
         if (this.chunks[i].hasOwnProperty('xhr')) {
           this.chunks[i].xhr.abort();
         }
       }
-      AmazonXHR.abort(this.auth, this.key, this.auth.uploadId, success_callback, error_callback);
+      if (abortOnCancel) {
+        AmazonXHR.abort(this.auth, this.key, this.auth.uploadId, success_callback, error_callback);
+      }
       this.reset();
     };
 
@@ -1814,7 +1816,7 @@
 
     DropzoneS3.prototype.accept = function(file, done) {
       var xhr, params;
-      if (file.size > this.options.validation.maxFilesize * 1024 * 1024) {
+      if (this.options.validation.maxFilesize && file.size > this.options.validation.maxFilesize * 1024 * 1024) {
         return done(this.options.dictFileTooBig.replace("{{filesize}}", Math.round(file.size / 1024 / 10.24) / 100).replace("{{maxFilesize}}", this.options.validation.maxFilesize));
       } else if (!DropzoneS3.isValidFile(file, this.options.validation.acceptedFiles)) {
         return done(this.options.dictInvalidFileType);
@@ -2188,7 +2190,7 @@
             return _this._fatalError(file, _this.options.dictResponseError.replace("{{statusCode}}", e.target.status), e.target);
           }
         };
-      })(this, file), this.options.abortOnCancel);
+      })(this, file), this.options.s3.abortOnCancel);
       file.status = DropzoneS3.CANCELED;
       this.emit("canceled", file);
 
@@ -2206,7 +2208,7 @@
       }
       this.files = without(this.files, file);
       this.emit("removedfile", file);
-      if (this.files.length === 0) {
+      if (this.files.length === 0 && this.dummyFiles.length === 0) {
         return this.emit("reset");
       }
     };
