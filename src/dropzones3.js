@@ -64,7 +64,7 @@
   // http://stackoverflow.com/questions/190852/how-can-i-get-file-extensions-with-javascript
   getExtension = function(filename, fallback) {
     var a = filename.split(".");
-    if( a.length === 1 || ( a[0] === "" && a.length === 2 ) ) {
+    if (a.length === 1 || (a[0] === "" && a.length === 2)) {
       return fallback;
     }
     return a.pop().toLowerCase();
@@ -294,7 +294,7 @@
   })(CryptoJS);
 
   AmazonXHR.init = function(auth, file, key, ssencrypt, load_callback, error_callback) {
-    var request  = {
+    var request = {
       auth: auth,
       key: key,
       method: "POST",
@@ -1044,9 +1044,14 @@
           _results = [];
           for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
             removeLink = _ref2[_k];
+            removeLink.addEventListener("keypress", function(evt) {
+              if (evt.keyCode == 13) {
+                removeFileEvent(evt);
+              }
+            });
             _results.push(removeLink.addEventListener("click", removeFileEvent));
           }
-          // return _results;
+          return _results;
         }
       },
       removedfile: function(file) {
@@ -1156,7 +1161,8 @@
       sending: noop,
       notify: function(file, done) {
         if (this.options.notifying.notify) {
-          var _this = this, xhr = new XMLHttpRequest();
+          var _this = this,
+            xhr = new XMLHttpRequest();
 
           file.status = DropzoneS3.NOTIFYING;
 
@@ -1473,6 +1479,17 @@
           "dragend": (function(_this) {
             return function(e) {
               return _this.emit("dragend", e);
+            };
+          })(this)
+        }
+      }, {
+        element: this.element,
+        events: {
+          "keypress": (function(_this) {
+            return function(evt) {
+              if (evt.keyCode == 13 && evt.target === _this.element) {
+                return _this.hiddenFileInput.click();
+              }
             };
           })(this)
         }
@@ -1921,7 +1938,8 @@
     };
 
     DropzoneS3.prototype.processQueue = function() {
-      var _this = this, file, chunkNum,
+      var _this = this,
+        file, chunkNum,
         activeFiles = this.getActiveFiles(),
         workerCount = this.getWorkerCount();
 
@@ -2032,7 +2050,11 @@
             // See if file has an uploadID from a previous upload attempt and try to resume.
             if (_this.options.resuming.localStorageResume === true && _this.options.validation.allowDuplicates === false) {
               var item;
-              if ((item = window.localStorage.getItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified })))) {
+              if ((item = window.localStorage.getItem(_this.options.resuming.localStoragePrefix + JSON.stringify({
+                  "n": file.name,
+                  "s": file.size,
+                  "l": file.lastModified
+                })))) {
                 item = JSON.parse(item);
                 auth.uploadId = item.u;
                 auth.key = item.k;
@@ -2048,7 +2070,14 @@
                 } else {
                   // Save uploadId in case resume is needed.
                   if (_this.options.resuming.localStorageResume === true && _this.options.validation.allowDuplicates === false) {
-                    window.localStorage.setItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ "n": file.name, "s": file.size, "l": file.lastModified }), JSON.stringify({ "u": file.upload.auth.uploadId, "k": file.upload.auth.key }));
+                    window.localStorage.setItem(_this.options.resuming.localStoragePrefix + JSON.stringify({
+                      "n": file.name,
+                      "s": file.size,
+                      "l": file.lastModified
+                    }), JSON.stringify({
+                      "u": file.upload.auth.uploadId,
+                      "k": file.upload.auth.key
+                    }));
                   }
                   _this.emit("fileinit", file, function() {
                     file.status = DropzoneS3.QUEUED;
@@ -2200,7 +2229,11 @@
     };
 
     DropzoneS3.prototype.removeFile = function(file) {
-      window.localStorage.removeItem(this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
+      window.localStorage.removeItem(this.options.resuming.localStoragePrefix + JSON.stringify({
+        'n': file.name,
+        's': file.size,
+        'l': file.lastModified
+      }));
       if (file.processed === true) {
         this.cancelUpload(file);
       } else {
@@ -2237,7 +2270,11 @@
       var success_callback = (function(_this, file) {
         return function(e) {
           file.s3success = true;
-          window.localStorage.removeItem(_this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
+          window.localStorage.removeItem(_this.options.resuming.localStoragePrefix + JSON.stringify({
+            'n': file.name,
+            's': file.size,
+            'l': file.lastModified
+          }));
           _this.emit("notify", file, function(file) {
             _this._finished(file);
           });
@@ -2305,7 +2342,11 @@
         _this.emit("resumed", file);
         file.paused = false;
       }
-      window.localStorage.removeItem(this.options.resuming.localStoragePrefix + JSON.stringify({ 'n': file.name, 's': file.size, 'l': file.lastModified }));
+      window.localStorage.removeItem(this.options.resuming.localStoragePrefix + JSON.stringify({
+        'n': file.name,
+        's': file.size,
+        'l': file.lastModified
+      }));
       this.emit("error", file, message, xhr);
       this.emit("complete", file);
       return setTimeout(function() {
