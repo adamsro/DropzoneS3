@@ -174,7 +174,6 @@
       url = url.slice(0, -1); // remove extra ampersand
 
       var xhr = new XMLHttpRequest();
-      xhr.timeout = self.settings.timeout || 0;
       xhr.addEventListener("load", self.settings.load_callback, true);
       xhr.addEventListener("readystatechange", self.settings.state_change_callback);
       xhr.addEventListener("error", self.settings.error_callback, true);
@@ -185,6 +184,7 @@
       self.settings.method = self.settings.method || "GET";
 
       xhr.open(self.settings.method, url, true);
+      xhr.timeout = self.settings.timeout || 0;
       for (var header in self.headers) {
         xhr.setRequestHeader(header, self.headers[header]);
       }
@@ -1185,7 +1185,6 @@
           xhr.onerror = xhr.ontimeout = function(e) {
             return _this._recoverableError(file, e.target);
           };
-          xhr.timeout = 20000; // 20 seconds
 
           var params = {
             filename: file.name,
@@ -1195,6 +1194,7 @@
           };
           extend(params, this.options.notifying.params);
           xhr.open("POST", this.options.notifying.endpoint, true);
+          xhr.timeout = 20000; // 20 seconds
           xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
           xhr.send(param(params));
         } else {
@@ -2117,8 +2117,8 @@
 
         this.emit("sign", file, xhr, params);
 
-        xhr.timeout = 20000; // 20 seconds
         xhr.open("POST", this.options.signing.endpoint, true);
+        xhr.timeout = 20000; // 20 seconds
         //Send the proper header information along with the request
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         // Convert object to url/POST friendly string and send in body
